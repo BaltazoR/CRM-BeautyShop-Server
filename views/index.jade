@@ -1,0 +1,10 @@
+extends layout
+
+block content
+  form(action="/logout", method="post")
+    h1= title
+    hr
+    h2 Welcome:  #{username}
+    h3 Your email:  #{email}
+    br
+    button(type="submit") Выход

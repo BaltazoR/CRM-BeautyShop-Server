@@ -1,0 +1,15 @@
+extends layout
+
+block content
+  a(href="/register") регистрация
+  hr
+  h1= title
+  form(action="/login", method="post")
+    p Введите Email
+    input(type="text" name='email')
+    br
+    p Введите пароль
+    input(type="password" name='password')
+    br
+    br
+    button(type="submit") Войти
