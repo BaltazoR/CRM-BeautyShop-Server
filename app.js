@@ -21,21 +21,21 @@ let jwt = {
     secretOrKey: process.env.secretOrKey
 };
 
-passport.use(new Strategy(jwt, function(jwt_payload, done) {
-    if(jwt_payload != void(0)) return done(false, jwt_payload);
+passport.use(new Strategy(jwt, function (jwt_payload, done) {
+    if (jwt_payload != void (0)) return done(false, jwt_payload);
     done();
 }));
 
 require('./models/db');
 
 let index = require('./routes/index');
+let users = require('./routes/users');
 
 let app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
-
 
 app.use(logger('dev'));
 app.use(bodyParser.json());
@@ -44,7 +44,23 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 
-app.use('/', index);
+// Dev fix for front-end
+app.use(function (req, res, next) {
+    // Website you wish to allow to connect
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:4200');
+    // Request methods you wish to allow
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+    // Request headers you wish to allow
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+    // Set to true if you need the website to include cookies in the requests sent
+    // to the API (e.g. in case you use sessions)
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    // Pass to next layer of middleware
+    next();
+});
+
+//app.use('/', index);
+app.use('/api', users);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
