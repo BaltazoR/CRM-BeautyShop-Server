@@ -6,7 +6,8 @@ let router = express.Router();
 
 
 router.get('/', function (req, res) {
-    res.sendFile('build/index.html');
+    res.sendStatus(200);
+    //res.redirect('http://ukr.net');
 });
 
 
