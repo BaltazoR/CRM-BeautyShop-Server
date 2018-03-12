@@ -4,7 +4,8 @@ let bcrtypt = require('bcryptjs');
 let userSchema = new mongoose.Schema({
     email: { type: String, unique: true, required: true },
     name: { type: String, required: true },
-    phoneNumber: { type: String, unique: true, required: true },
+    //phoneNumber: { type: String, unique: true, required: true },
+    phoneNumber: { type: String, required: true },
     password: String,
     role: { type: String, required: true },
     avatar: { type: String, default: 'default.jpg' },
