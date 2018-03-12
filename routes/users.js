@@ -100,7 +100,7 @@ router.post('/users', function (req, res) {
 });
 
 
-router.get('/users', (req, res, next) => {
+router.get('/users', checkAuth, (req, res, next) => {
     User.find({})
         .then(users => {
             res.json(users);
