@@ -47,13 +47,14 @@ app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 // Dev fix for front-end
 app.use(function (req, res, next) {
     // Website you wish to allow to connect
-    let allowedOrigins = ['http://localhost:4200 ', 'https://s3.eu-central-1.amazonaws.com', 'https://s3.eu-central-1.amazonaws.com/crm-beauty-shop'];
+    res.setHeader('Access-Control-Allow-Origin', '*');
+
+    /* let allowedOrigins = ['http://localhost:4200 ', 'https://s3.eu-central-1.amazonaws.com', 'https://s3.eu-central-1.amazonaws.com/crm-beauty-shop'];
     let origin = req.headers.origin;
     if (allowedOrigins.indexOf(origin) > -1) {
         res.setHeader('Access-Control-Allow-Origin', origin);
-    }
-    //res.setHeader('Access-Control-Allow-Origin', 'http://localhost:4200 https://s3.eu-central-1.amazonaws.com');
-    //res.setHeader('Access-Control-Allow-Origin', 'https://s3.eu-central-1.amazonaws.com');
+    } */
+
     // Request methods you wish to allow
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
     // Request headers you wish to allow
