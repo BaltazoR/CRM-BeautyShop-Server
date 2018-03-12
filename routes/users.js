@@ -103,7 +103,7 @@ router.post('/users', function (req, res) {
 });
 
 
-router.get('/users', checkAuth, (req, res, next) => {
+router.get('/users', (req, res, next) => {
     User.find({})
         .then(users => {
             let usersOut = [];
