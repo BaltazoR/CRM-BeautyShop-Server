@@ -62,7 +62,7 @@ router.post('/login', function (req, res) {
             });
 
             let userData = {
-                _id: user._doc._id,
+                id: user._doc._id,
                 name: user._doc.name,
                 email: user._doc.email,
                 token: token
