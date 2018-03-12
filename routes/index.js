@@ -6,8 +6,8 @@ let router = express.Router();
 
 
 router.get('/', function (req, res) {
-    res.sendStatus(200);
-    //res.redirect('http://ukr.net');
+    //res.sendStatus(200);
+    res.redirect('https://s3.eu-central-1.amazonaws.com/crm-beauty-shop/index.html');
 });
 
 
