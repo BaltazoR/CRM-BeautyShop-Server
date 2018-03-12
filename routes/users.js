@@ -62,9 +62,12 @@ router.post('/login', function (req, res) {
             });
 
             let userData = {
-                id: user._doc._id,
-                name: user._doc.name,
-                email: user._doc.email,
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                phoneNumber: user.phoneNumber,
+                avatar: user.avatar,
+                userInfo: user.userInfo,
                 token: token
             };
             res.json(userData);
@@ -103,7 +106,21 @@ router.post('/users', function (req, res) {
 router.get('/users', checkAuth, (req, res, next) => {
     User.find({})
         .then(users => {
-            res.json(users);
+            let usersOut = [];
+            users.forEach(element => {
+                let user = {
+                    _id: element._id,
+                    email: element.email,
+                    name: element.name,
+                    phoneNumber: element.phoneNumber,
+                    avatar: element.avatar,
+                    userInfo: element.userInfo,
+                }
+                usersOut.push(user);
+            });
+
+            console.log(usersOut);
+            res.json(usersOut);
         })
         .catch(next);
 });
