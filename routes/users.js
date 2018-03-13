@@ -130,9 +130,11 @@ router.get('/users', (req, res, next) => {
 
 // Get user by id
 router.get('/users/:id', (req, res) => {
-    console.log('req.params.id =', req.params.id);
-    User.findOne({ _id: req.params.id }, function (err, user) {
-        if (user === void (0)) return res.status(400).json({ status: 'error', message: "User not find" });
+    const id = _.escapeRegExp(req.params.id);
+    //console.log(id);
+    User.findOne({ _id: id }, function (err, user) {
+        //  console.log(user);
+        if (user === (null || undefined)) return res.status(400).json({ status: 'error', message: "User not find" });
         let userData = {
             id: user._id,
             name: user.name,
