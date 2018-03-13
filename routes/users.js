@@ -52,7 +52,7 @@ function createToken(body) {
     );
 }
 
-
+// login user
 router.post('/login', function (req, res) {
     User.findOne({ email: { $regex: _.escapeRegExp(req.body.email), $options: "i" } }, function (err, user) {
         if (user != void (0) && bcrypt.compareSync(req.body.password, user.password) && compare(user.email, req.body.email)) {
@@ -78,12 +78,13 @@ router.post('/login', function (req, res) {
     });
 });
 
+// logout user
 router.post('/logout', (req, res) => {
     res.clearCookie('token');
     res.json({ status: 'ok' });
 });
 
-
+// Create user
 router.post('/users', function (req, res) {
     User.findOne({ email: { $regex: _.escapeRegExp(req.body.email), $options: "i" } }, function (err, user) {
         if (user != void (0)) return res.status(400).json({ status: 'error', message: "User already exist" });
@@ -105,7 +106,7 @@ router.post('/users', function (req, res) {
     });
 });
 
-
+// Send all users to front
 router.get('/users', (req, res, next) => {
     User.find({})
         .then(users => {
@@ -121,7 +122,6 @@ router.get('/users', (req, res, next) => {
                 }
                 usersOut.push(user);
             });
-
             console.log(usersOut);
             res.json(usersOut);
         })
