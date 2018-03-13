@@ -66,6 +66,7 @@ router.post('/login', function (req, res) {
                 name: user.name,
                 email: user.email,
                 phoneNumber: user.phoneNumber,
+                role: user.role,
                 avatar: user.avatar,
                 userInfo: user.userInfo,
                 token: token
