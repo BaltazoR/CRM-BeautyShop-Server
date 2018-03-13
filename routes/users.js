@@ -91,6 +91,8 @@ router.post('/users', function (req, res) {
             email: req.body.email,
             name: req.body.name,
             password: req.body.password,
+            phoneNumber: req.body.phoneNumber,
+            role: req.body.role,
             ip: getIp(req)
         });
 
