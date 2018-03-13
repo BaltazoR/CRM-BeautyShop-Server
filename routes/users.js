@@ -128,5 +128,23 @@ router.get('/users', (req, res, next) => {
         .catch(next);
 });
 
+// Get user by id
+router.get('/users/:id', (req, res) => {
+    console.log('req.params.id =', req.params.id);
+    User.findOne({ _id: req.params.id }, function (err, user) {
+        if (user === void (0)) return res.status(400).json({ status: 'error', message: "User not find" });
+        let userData = {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            phoneNumber: user.phoneNumber,
+            role: user.role,
+            avatar: user.avatar,
+            userInfo: user.userInfo
+        };
+        console.log(userData);
+        res.json(userData);
+    });
+});
 
 module.exports = router;
