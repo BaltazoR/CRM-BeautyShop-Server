@@ -113,7 +113,7 @@ router.get('/users', (req, res, next) => {
             let usersOut = [];
             users.forEach(element => {
                 let user = {
-                    _id: element._id,
+                    id: element._id,
                     email: element.email,
                     name: element.name,
                     phoneNumber: element.phoneNumber,
