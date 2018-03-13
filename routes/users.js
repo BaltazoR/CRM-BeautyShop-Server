@@ -117,6 +117,7 @@ router.get('/users', (req, res, next) => {
                     email: element.email,
                     name: element.name,
                     phoneNumber: element.phoneNumber,
+                    role: element.role,
                     avatar: element.avatar,
                     userInfo: element.userInfo,
                 }
