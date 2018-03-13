@@ -88,12 +88,23 @@ router.post('/logout', (req, res) => {
 router.post('/users', function (req, res) {
     User.findOne({ email: { $regex: _.escapeRegExp(req.body.email), $options: "i" } }, function (err, user) {
         if (user != void (0)) return res.status(400).json({ status: 'error', message: "User already exist" });
+
+        let avatar;
+        if (req.body.role === 'customer') {
+            avatar = 'def_customer.jpg'
+        } else if (req.body.role === 'master') {
+            avatar = 'def_master.jpg'
+        } else {
+            avatar = 'default.jpg'
+        }
+
         user = User.create({
             email: req.body.email,
             name: req.body.name,
             password: req.body.password,
             phoneNumber: req.body.phoneNumber,
             role: req.body.role,
+            avatar: avatar,
             ip: getIp(req)
         });
 
