@@ -7,7 +7,7 @@ let router = express.Router();
 
 router.get('/', function (req, res) {
     //res.sendStatus(200);
-    res.redirect('https://s3.eu-central-1.amazonaws.com/beauty-shop/index.html');
+    res.redirect('http://beauty-shop.s3-website.eu-central-1.amazonaws.com/');
 });
 
 
