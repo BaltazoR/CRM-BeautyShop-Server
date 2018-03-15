@@ -2,8 +2,6 @@
  * TODO:
  * - создать контролер
  * - привести в порядок роутер
- * - добавить проверки на ошибки
- * - добавить ответы для фронтэнда
  */
 
 let express = require('express');
@@ -16,6 +14,10 @@ let _ = require('lodash');
 let passport = require('passport');
 let jwt = require('jsonwebtoken');
 
+function sendJSONresponse(res, status, content) {
+    res.status(status);
+    res.json(content);
+}
 
 function compare(a, b) {
     return (a === b);
@@ -52,113 +54,160 @@ function createToken(body) {
     );
 }
 
-// login user
+// login user (Done)
 router.post('/login', function (req, res) {
-    User.findOne({ email: { $regex: _.escapeRegExp(req.body.email), $options: "i" } }, function (err, user) {
-        if (user != void (0) && bcrypt.compareSync(req.body.password, user.password) && compare(user.email, req.body.email)) {
-            let token = createToken({ id: user._id, username: user.name, email: user.email });
-            res.cookie('token', token, {
-                httpOnly: true
-            });
+    if (req.body && req.body.email && req.body.password) {
+        User
+            .findOne({ email: { $regex: _.escapeRegExp(req.body.email.toLowerCase()), $options: "i" } }, function (err, user) {
+                if (err) {
+                    sendJSONresponse(res, 400, err);
+                    return;
+                }
+                if (user && bcrypt.compareSync(req.body.password, user.password) && compare(user.email, req.body.email.toLowerCase())) {
+                    let token = createToken({ id: user._id, username: user.name, email: user.email });
+                    res.cookie('token', token, {
+                        httpOnly: true
+                    });
 
-            let userData = {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                phoneNumber: user.phoneNumber,
-                role: user.role,
-                avatar: user.avatar,
-                userInfo: user.userInfo,
-                token: token
-            };
-            res.json(userData);
-        } else {
-            res.json({ status: 'error' });
-        }
-    });
+                    let userData = {
+                        id: user._id,
+                        name: user.name,
+                        email: user.email,
+                        phoneNumber: user.phoneNumber,
+                        role: user.role,
+                        avatar: user.avatar,
+                        userInfo: user.userInfo,
+                        token: token
+                    };
+
+                    sendJSONresponse(res, 200, userData);
+                } else {
+                    sendJSONresponse(res, 400, {
+                        message: "wrong login or password"
+                    });
+                    return;
+                }
+            });
+    } else {
+        sendJSONresponse(res, 400, {
+            "message": "All required fields must be filled"
+        });
+    }
 });
 
 // logout user
 router.post('/logout', (req, res) => {
     res.clearCookie('token');
-    res.json({ status: 'ok' });
+    sendJSONresponse(res, 200, {
+        "message": "logout success"
+    });
 });
 
-// Create user
+// Create user (Done)
 router.post('/users', function (req, res) {
-    User.findOne({ email: { $regex: _.escapeRegExp(req.body.email), $options: "i" } }, function (err, user) {
-        if (user != void (0)) return res.status(400).json({ status: 'error', message: "User already exist" });
-
-        let avatar;
-        if (req.body.role === 'customer') {
-            avatar = 'def_customer.jpg'
-        } else if (req.body.role === 'master') {
-            avatar = 'def_master.jpg'
-        } else {
-            avatar = 'default.jpg'
-        }
-
-        user = User.create({
-            email: req.body.email,
-            name: req.body.name,
-            password: req.body.password,
-            phoneNumber: req.body.phoneNumber,
-            role: req.body.role,
-            avatar: avatar,
-            ip: getIp(req)
-        });
-
-        // let token = createToken({ id: user._id, username: user.name, email: user.email });
-        // res.cookie('token', token, {
-        //     httpOnly: true
-        // });
-
-        res.json({ status: 'ok' });
-    });
-});
-
-// Send all users to front
-router.get('/users', (req, res, next) => {
-    User.find({})
-        .then(users => {
-            let usersOut = [];
-            users.forEach(element => {
-                let user = {
-                    id: element._id,
-                    email: element.email,
-                    name: element.name,
-                    phoneNumber: element.phoneNumber,
-                    role: element.role,
-                    avatar: element.avatar,
-                    userInfo: element.userInfo,
+    if (req.body && req.body.email && req.body.password && req.body.phoneNumber && req.body.role) {
+        User
+            .findOne({ email: { $regex: _.escapeRegExp(req.body.email), $options: "i" } }, function (err, user) {
+                if (err) {
+                    sendJSONresponse(res, 400, err);
+                    return;
                 }
-                usersOut.push(user);
+                if (user) {
+                    sendJSONresponse(res, 400, {
+                        message: "User already exist"
+                    });
+                    return;
+                }
+                // Create default avatar
+                let avatar = 'def_customer.jpg';
+                if (req.body.role === 'master') avatar = 'def_master.jpg';
+
+                user = User.create({
+                    email: req.body.email.toLowerCase(),
+                    name: req.body.name,
+                    password: req.body.password,
+                    phoneNumber: req.body.phoneNumber,
+                    role: req.body.role,
+                    avatar: avatar,
+                    ip: getIp(req)
+                }, function (err, user) {
+                    if (err) {
+                        sendJSONresponse(res, 400, err);
+                    } else {
+                        sendJSONresponse(res, 201, user);
+                    }
+                });
             });
-            console.log(usersOut);
-            res.json(usersOut);
-        })
-        .catch(next);
+    } else {
+        sendJSONresponse(res, 400, {
+            "message": "All required fields must be filled"
+        });
+    }
 });
 
-// Get user by id
+// Send all users to front (Done)
+router.get('/users', function (req, res) {
+    User.find({})
+        .exec(function (err, users) {
+            if (err) {
+                sendJSONresponse(res, 404, err);
+                return;
+            }
+            if (users) {
+                let usersOut = [];
+                users.forEach(element => {
+                    let user = {
+                        id: element._id,
+                        email: element.email,
+                        name: element.name,
+                        phoneNumber: element.phoneNumber,
+                        role: element.role,
+                        avatar: element.avatar,
+                        userInfo: element.userInfo,
+                    }
+                    usersOut.push(user);
+                });
+                sendJSONresponse(res, 200, usersOut);
+            } else {
+                sendJSONresponse(res, 404, {
+                    message: "users not found"
+                });
+            }
+
+        })
+});
+
+// Get user by id (Done)
 router.get('/users/:id', (req, res) => {
-    const id = _.escapeRegExp(req.params.id);
-    //console.log(id);
-    User.findOne({ _id: id }, function (err, user) {
-        //  console.log(user);
-        if (user === (null || undefined)) return res.status(400).json({ status: 'error', message: "User not find" });
-        let userData = {
-            id: user._id,
-            name: user.name,
-            email: user.email,
-            phoneNumber: user.phoneNumber,
-            role: user.role,
-            avatar: user.avatar,
-            userInfo: user.userInfo
-        };
-        console.log(userData);
-        res.json(userData);
-    });
+    if (req.params && req.params.id) {
+        User
+            .findById(_.escapeRegExp(req.params.id))
+            .exec(function (err, user) {
+                if (!user) {
+                    sendJSONresponse(res, 404, {
+                        message: "User not found"
+                    });
+                    return;
+                } else if (err) {
+                    sendJSONresponse(res, 404, err);
+                    return;
+                }
+                let userData = {
+                    id: user._id,
+                    name: user.name,
+                    email: user.email,
+                    phoneNumber: user.phoneNumber,
+                    role: user.role,
+                    avatar: user.avatar,
+                    userInfo: user.userInfo
+                };
+                sendJSONresponse(res, 200, userData);
+            });
+    } else {
+        sendJSONresponse(res, 404, {
+            message: "no id in request"
+        });
+    }
 });
 
 module.exports = router;
