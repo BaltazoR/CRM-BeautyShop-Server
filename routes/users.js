@@ -52,6 +52,18 @@ function createToken(body) {
     );
 }
 
+function userData (user) {
+    return  user = {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        role: user.role,
+        avatar: user.avatar,
+        userInfo: user.userInfo,
+    };
+}
+
 // login user (Done)
 router.post('/login', function (req, res) {
     if (req.body && req.body.email && req.body.password) {
@@ -63,25 +75,17 @@ router.post('/login', function (req, res) {
                 }
                 if (user && bcrypt.compareSync(req.body.password, user.password) && compare(user.email, req.body.email.toLowerCase())) {
                     let token = createToken({ id: user._id, username: user.name, email: user.email });
-                    res.cookie('token', token, {
+                    /*  res.cookie('token', token, {
                         httpOnly: true
-                    });
+                    }); */
 
-                    let userData = {
-                        id: user._id,
-                        name: user.name,
-                        email: user.email,
-                        phoneNumber: user.phoneNumber,
-                        role: user.role,
-                        avatar: user.avatar,
-                        userInfo: user.userInfo,
-                        token: token
-                    };
+                    let userPlusToken = userData(user);
+                    userPlusToken.token = token;
 
-                    sendJSONresponse(res, 200, userData);
+                    sendJSONresponse(res, 200, userPlusToken);
                 } else {
                     sendJSONresponse(res, 400, {
-                        message: "wrong login or password"
+                        message: "Wrong login or password"
                     });
                     return;
                 }
@@ -132,7 +136,7 @@ router.post('/users', function (req, res) {
                     if (err) {
                         sendJSONresponse(res, 400, err);
                     } else {
-                        sendJSONresponse(res, 201, user);
+                        sendJSONresponse(res, 201, userData(user));
                     }
                 });
             });
@@ -154,16 +158,7 @@ router.get('/users', function (req, res) {
             if (users) {
                 let usersOut = [];
                 users.forEach(element => {
-                    let user = {
-                        id: element._id,
-                        email: element.email,
-                        name: element.name,
-                        phoneNumber: element.phoneNumber,
-                        role: element.role,
-                        avatar: element.avatar,
-                        userInfo: element.userInfo,
-                    }
-                    usersOut.push(user);
+                    usersOut.push(userData(element));
                 });
                 sendJSONresponse(res, 200, usersOut);
             } else {
@@ -190,16 +185,7 @@ router.get('/users/:id', function (req, res) {
                     sendJSONresponse(res, 404, err);
                     return;
                 }
-                let userData = {
-                    id: user._id,
-                    name: user.name,
-                    email: user.email,
-                    phoneNumber: user.phoneNumber,
-                    role: user.role,
-                    avatar: user.avatar,
-                    userInfo: user.userInfo
-                };
-                sendJSONresponse(res, 200, userData);
+                sendJSONresponse(res, 200, userData(user));
             });
     } else {
         sendJSONresponse(res, 404, {
@@ -227,16 +213,7 @@ router.put('/users/:id', checkAuth, function (req, res) {
                     sendJSONresponse(res, 500, err);
                     return;
                 }
-                let userData = {
-                    id: user._id,
-                    name: user.name,
-                    email: user.email,
-                    phoneNumber: user.phoneNumber,
-                    role: user.role,
-                    avatar: user.avatar,
-                    userInfo: user.userInfo
-                };
-                sendJSONresponse(res, 200, userData);
+                sendJSONresponse(res, 200, userData(user));
             });
     } else {
         sendJSONresponse(res, 404, {
