@@ -112,7 +112,7 @@ router.post('/users', function (req, res) {
                 }
                 if (user) {
                     sendJSONresponse(res, 400, {
-                        message: "User already exist"
+                        message: "User with email or phone number already exist"
                     });
                     return;
                 }
