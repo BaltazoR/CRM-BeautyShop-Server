@@ -1,5 +1,5 @@
 let mongoose = require('mongoose');
-let bcrtypt = require('bcryptjs');
+let bcrypt = require('bcryptjs');
 
 let userSchema = new mongoose.Schema({
     email: { type: String, unique: true, required: true },
@@ -15,7 +15,7 @@ let userSchema = new mongoose.Schema({
 });
 
 userSchema.pre('save', function (next) {
-    if (this.isModified('password') || this.isNew()) this.password = bcrtypt.hashSync(this.password, 12);
+    if (this.isModified('password') || this.isNew()) this.password = bcrypt.hashSync(this.password, 12);
     next();
 });
 

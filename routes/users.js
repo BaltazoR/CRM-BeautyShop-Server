@@ -31,16 +31,14 @@ function getIp(req) {
     return ip.replace(/::ffff:/, '');
 }
 
-function ExtractJwt(req) {
-    let token = null;
-    if (req.cookies && req.cookies.token != void (0)) token = req.cookies.token;
-    return token;
-}
-
-
 function checkAuth(req, res, next) {
     passport.authenticate('jwt', { session: false }, (err, decryptToken, jwtError) => {
-        if (jwtError != void (0) || err != void (0)) return res.render('login', { error: err || jwtError });
+        if (jwtError != void (0) || err != void (0)) {
+            //console.log('err = ', err);
+            //console.log('jwtError = ', jwtError);
+            sendJSONresponse(res, 403, { error: err || jwtError });
+            return;
+        }
         req.user = decryptToken;
         next();
     })(req, res, next);
@@ -178,7 +176,7 @@ router.get('/users', function (req, res) {
 });
 
 // Get user by id (Done)
-router.get('/users/:id', (req, res) => {
+router.get('/users/:id', function (req, res) {
     if (req.params && req.params.id) {
         User
             .findById(_.escapeRegExp(req.params.id))
@@ -209,5 +207,44 @@ router.get('/users/:id', (req, res) => {
         });
     }
 });
+
+// Modify User (avatar ???)
+router.put('/users/:id', checkAuth, function (req, res) {
+    if (req.params && req.params.id && req.body && req.body.id) {
+        User
+            .findByIdAndUpdate(req.body.id, {
+                name: req.body.name,
+                email: req.body.email,
+                phoneNumber: req.body.phoneNumber,
+                role: req.body.role,
+                userInfo: req.body.userInfo,
+                password: bcrypt.hashSync(req.body.password, 12)
+            }, { new: true }, function (err, user) {
+                if (!user) {
+                    sendJSONresponse(res, 500, err);
+                    return;
+                } else if (err) {
+                    sendJSONresponse(res, 500, err);
+                    return;
+                }
+                let userData = {
+                    id: user._id,
+                    name: user.name,
+                    email: user.email,
+                    phoneNumber: user.phoneNumber,
+                    role: user.role,
+                    avatar: user.avatar,
+                    userInfo: user.userInfo
+                };
+                sendJSONresponse(res, 200, userData);
+            });
+    } else {
+        sendJSONresponse(res, 404, {
+            message: "no id in request"
+        });
+    }
+
+});
+
 
 module.exports = router;
