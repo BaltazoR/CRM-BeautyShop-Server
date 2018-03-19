@@ -15,8 +15,12 @@ require('dotenv').config();
 let _ = require('lodash');
 let passport = require('passport');
 let jwt = require('jsonwebtoken');
+let multer = require('multer');
+let uniqid = require('uniqid');
+let fs = require('fs');
 
 function sendJSONresponse(res, status, content) {
+    console.log(status, content);
     res.status(status);
     res.json(content);
 }
@@ -54,8 +58,8 @@ function createToken(body) {
     );
 }
 
-function userData (user) {
-    return  user = {
+function userData(user) {
+    return user = {
         id: user._id,
         name: user.name,
         email: user.email,
@@ -65,6 +69,42 @@ function userData (user) {
         userInfo: user.userInfo,
     };
 }
+
+let storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        let path = `./uploads/avatars/${req.params.id}/`;
+        if (!fs.existsSync(path)) fs.mkdirSync(path);
+        cb(null, path);
+    },
+    filename: function (req, file, cb) {
+        let ext;
+        //console.log(file);
+        switch (file.mimetype) {
+            case 'image/jpeg':
+                ext = '.jpg';
+                cb(null, uniqid() + Date.now() + ext);
+                break;
+            case 'image/pjpeg':
+                ext = '.pjpeg';
+                cb(null, uniqid() + Date.now() + ext);
+                break;
+            case 'image/png':
+                ext = '.png';
+                cb(null, uniqid() + Date.now() + ext);
+                break;
+            case 'image/gif':
+                ext = '.gif';
+                cb(null, uniqid() + Date.now() + ext);
+                break;
+            default:
+                cb(new Error('You can only upload files with the extension jpg, png, gif'))
+                break;
+            //     return err = "You can only upload files with the extension jpg, png, gif";
+        }
+
+    }
+});
+let upload = multer({ storage: storage }).single('avatar');
 
 // login user (Done)
 router.post('/login', function (req, res) {
@@ -123,8 +163,8 @@ router.post('/users', function (req, res) {
                     return;
                 }
                 // Create default avatar
-                let avatar = 'def_customer.jpg';
-                if (req.body.role === 'master') avatar = 'def_master.jpg';
+                let avatar = 'images/avatars/def_customer.jpg';
+                if (req.body.role === 'master') avatar = 'images/avatars/def_master.jpg';
 
                 user = User.create({
                     email: req.body.email.toLowerCase(),
@@ -198,25 +238,36 @@ router.get('/users/:id', function (req, res) {
 
 // Modify User (avatar ???)
 router.put('/users/:id', checkAuth, function (req, res) {
-    if (req.params && req.params.id && req.body && req.body.id) {
-        User
-            .findByIdAndUpdate(req.body.id, {
+    if (req.params && req.params.id) {
+        upload(req, res, function (err) {
+            if (err) {
+                sendJSONresponse(res, 500, err);
+                return;
+            }
+
+            let user = {
                 name: req.body.name,
                 email: req.body.email,
                 phoneNumber: req.body.phoneNumber,
                 role: req.body.role,
                 userInfo: req.body.userInfo,
                 password: bcrypt.hashSync(req.body.password, 12)
-            }, { new: true }, function (err, user) {
-                if (!user) {
-                    sendJSONresponse(res, 500, err);
-                    return;
-                } else if (err) {
-                    sendJSONresponse(res, 500, err);
-                    return;
-                }
-                sendJSONresponse(res, 200, userData(user));
-            });
+            }
+
+            if (req.file) user.avatar = req.file.path.slice(8);
+
+            User
+                .findByIdAndUpdate(req.params.id, user, { new: true }, function (err, user) {
+                    if (!user) {
+                        sendJSONresponse(res, 500, err);
+                        return;
+                    } else if (err) {
+                        sendJSONresponse(res, 500, err);
+                        return;
+                    }
+                    sendJSONresponse(res, 200, userData(user));
+                });
+        });
     } else {
         sendJSONresponse(res, 404, {
             message: "no id in request"

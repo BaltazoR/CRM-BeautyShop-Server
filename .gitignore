@@ -68,3 +68,6 @@ temp.cmd
 karma.conf.js
 protractor.conf.js
 
+# directories avatars
+uploads/avatars/
+
