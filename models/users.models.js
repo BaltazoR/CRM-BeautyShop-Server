@@ -8,8 +8,8 @@ let userSchema = new mongoose.Schema({
     //phoneNumber: { type: String, required: true },
     password: String,
     role: { type: String, required: true },
-    avatar: { type: String, default: 'default.jpg' },
-    userInfo: { type: String },
+    avatar: { type: String },
+    userInfo: { type: String, default: '' },
     addedAt: { type: Date, default: Date.now },
     ip: { type: String }
 });
