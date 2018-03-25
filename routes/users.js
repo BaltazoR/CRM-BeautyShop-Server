@@ -90,7 +90,7 @@ let storage = multer.diskStorage({
                     }
 
                     let ext;
-                    file.origFileName = './public/images/avatars/' + user.avatar;
+                    file.origFileName = user.avatar;
 
                     let newFileName = uniqid() + Date.now();
 
@@ -288,12 +288,17 @@ router.put('/users/:id', checkAuth, function (req, res) {
                         return;
                     }
 
-                    if (fs.existsSync(req.file.origFileName)) {
-                        fs.unlinkSync(req.file.origFileName, (err) => {
+
+                    if (
+                        (fs.existsSync(req.file.destination + req.file.origFileName))
+                        && (req.file.origFileName !== 'def_customer.jpg')
+                        && (req.file.origFileName !== 'def_master.jpg')
+                    ) {
+                        fs.unlinkSync(req.file.destination + req.file.origFileName, (err) => {
                             if (err) console.log(req.file.origFileName + ' not deleted');
                         });
                     } else {
-                        console.log(req.file.origFileName + ' not found');
+                        console.log(req.file.destination + req.file.origFileName + ' not found');
                     }
 
 
