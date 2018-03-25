@@ -17,7 +17,7 @@ let passport = require('passport');
 let jwt = require('jsonwebtoken');
 let multer = require('multer');
 let uniqid = require('uniqid');
-//let fs = require('fs');
+let fs = require('fs');
 
 function sendJSONresponse(res, status, content) {
     console.log(status, content);
@@ -72,11 +72,9 @@ function userData(user) {
 
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        //let path = `./uploads/avatars/${req.params.id}/`;
-        //if (!fs.existsSync(path)) fs.mkdirSync(path);
         cb(null, './public/images/avatars/');
-        //cb(null, path);
     },
+
     filename: function (req, file, cb) {
         if (req.params && req.params.id) {
             User
@@ -84,49 +82,39 @@ let storage = multer.diskStorage({
                 .exec(function (err, user) {
 
                     if (!user) {
-                        cb(new Error('User not found'))
+                        cb(new Error(err));
                         return;
                     } else if (err) {
-                        cb(new Error(err))
+                        cb(new Error(err));
                         return;
                     }
 
                     let ext;
-                    let fileName = user.avatar;
+                    file.origFileName = './public/images/avatars/' + user.avatar;
 
-                    if (fileName === 'def_customer.jpg' && 'def_master.jpg') {
-                        fileName = uniqid() + Date.now();
-                        switch (file.mimetype) {
-                            case 'image/jpeg':
-                                ext = '.jpg';
-                                //cb(null, uniqid() + Date.now() + ext);
-                                cb(null, fileName + ext);
-                                break;
-                            case 'image/pjpeg':
-                                ext = '.pjpeg';
-                                //cb(null, uniqid() + Date.now() + ext);
-                                cb(null, fileName + ext);
-                                break;
-                            case 'image/png':
-                                ext = '.png';
-                                cb(null, fileName + ext);
-                                //cb(null, uniqid() + Date.now() + ext);
-                                break;
-                            case 'image/gif':
-                                ext = '.gif';
-                                cb(null, fileName + ext);
-                                //cb(null, uniqid() + Date.now() + ext);
-                                break;
-                            default:
-                                cb(new Error('You can only upload files with the extension jpg, png, gif'))
-                                break;
-                            //     return err = "You can only upload files with the extension jpg, png, gif";
-                        }
-                    } else {
-                        cb(null, fileName);
-                        return;
+                    let newFileName = uniqid() + Date.now();
+
+                    switch (file.mimetype) {
+                        case 'image/jpeg':
+                            ext = '.jpg';
+                            cb(null, newFileName + ext);
+                            break;
+                        case 'image/pjpeg':
+                            ext = '.pjpeg';
+                            cb(null, newFileName + ext);
+                            break;
+                        case 'image/png':
+                            ext = '.png';
+                            cb(null, newFileName + ext);
+                            break;
+                        case 'image/gif':
+                            ext = '.gif';
+                            cb(null, newFileName + ext);
+                            break;
+                        default:
+                            cb(new Error('You can only upload files with the extension jpg, png, gif'));
+                            return;
                     }
-
                 });
         } else {
             cb(new Error('no id in request'));
@@ -136,7 +124,10 @@ let storage = multer.diskStorage({
     }
 });
 
-let upload = multer({ storage: storage }).single('avatar');
+let upload = multer({
+    storage: storage,
+    limits: { fileSize: 1024 * 1024 } // Filesize avatar max. 1 MB
+}).single('avatar');
 
 // login user (Done)
 router.post('/login', function (req, res) {
@@ -268,7 +259,7 @@ router.get('/users/:id', function (req, res) {
     }
 });
 
-// Modify User (avatar ???)
+// Modify User (Done)
 router.put('/users/:id', checkAuth, function (req, res) {
     if (req.params && req.params.id) {
         upload(req, res, function (err) {
@@ -281,7 +272,6 @@ router.put('/users/:id', checkAuth, function (req, res) {
                 name: req.body.name,
                 email: req.body.email,
                 phoneNumber: req.body.phoneNumber,
-                role: req.body.role,
                 userInfo: req.body.userInfo,
                 password: bcrypt.hashSync(req.body.password, 12)
             }
@@ -291,13 +281,24 @@ router.put('/users/:id', checkAuth, function (req, res) {
             User
                 .findByIdAndUpdate(req.params.id, user, { new: true }, function (err, user) {
                     if (!user) {
-                        sendJSONresponse(res, 500, err);
+                        sendJSONresponse(res, 404, err);
                         return;
                     } else if (err) {
                         sendJSONresponse(res, 500, err);
                         return;
                     }
+
+                    if (fs.existsSync(req.file.origFileName)) {
+                        fs.unlinkSync(req.file.origFileName, (err) => {
+                            if (err) console.log(req.file.origFileName + ' not deleted');
+                        });
+                    } else {
+                        console.log(req.file.origFileName + ' not found');
+                    }
+
+
                     sendJSONresponse(res, 200, userData(user));
+
                 });
         });
     } else {
