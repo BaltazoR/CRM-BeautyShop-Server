@@ -1,18 +1,11 @@
-
-
 let express = require('express');
 let router = express.Router();
 //let User = require('../models/users.models');
 let Entries = require('../models/entries.models');
-require('dotenv').config();
-let passport = require('passport');
-let jwt = require('jsonwebtoken');
-
-function sendJSONresponse(res, status, content) {
-    console.log(status, content);
-    res.status(status);
-    res.json(content);
-}
+//require('dotenv').config();
+//let passport = require('passport');
+//let jwt = require('jsonwebtoken');
+let fmain = require('../functions/fmain');
 
 
 // Create Entrie (Done)
@@ -27,7 +20,7 @@ router.post('/entries', function (req, res) {
             customerComment: req.body.customerComment
         }, function (err, entrie) {
             if (err) {
-                sendJSONresponse(res, 400, err);
+                fmain.sendJSONresponse(res, 400, err);
             } else {
                 if (entrie.id) {
                     Entries.findById(entrie.id)
@@ -35,31 +28,27 @@ router.post('/entries', function (req, res) {
                         .populate('customerId', '-password -ip -addedAt')
                         .exec(function (err, entrie) {
                             if (!entrie) {
-                                sendJSONresponse(res, 404, {
+                                fmain.sendJSONresponse(res, 404, {
                                     message: "entries not create"
                                 });
                                 return;
                             } else if (err) {
-                                sendJSONresponse(res, 400, err);
+                                fmain.sendJSONresponse(res, 400, err);
                                 return;
                             }
-                            sendJSONresponse(res, 201, entrie);
+                            fmain.sendJSONresponse(res, 201, entrie);
                             return;
                         });
                 } else {
-                    sendJSONresponse(res, 404, {
+                    fmain.sendJSONresponse(res, 404, {
                         message: "entries not create"
                     });
                     return;
                 }
-
-
-
-                // sendJSONresponse(res, 201, entrie);
             }
         });
     } else {
-        sendJSONresponse(res, 400, {
+        fmain.sendJSONresponse(res, 400, {
             "message": "All required fields must be filled"
         });
         return;
@@ -73,7 +62,7 @@ router.get('/entries', function (req, res) {
         .populate('customerId', '-password -ip -addedAt')
         .exec(function (err, entries) {
             if (err) {
-                sendJSONresponse(res, 404, err);
+                fmain.sendJSONresponse(res, 404, err);
                 return;
             }
             if (entries) {
@@ -81,10 +70,10 @@ router.get('/entries', function (req, res) {
                 entries.forEach(element => {
                     entriesOut.push(element);
                 });
-                sendJSONresponse(res, 200, entriesOut);
+                fmain.sendJSONresponse(res, 200, entriesOut);
                 return;
             } else {
-                sendJSONresponse(res, 404, {
+                fmain.sendJSONresponse(res, 404, {
                     message: "entries not found"
                 });
                 return;
@@ -93,10 +82,8 @@ router.get('/entries', function (req, res) {
         })
 });
 
-/**
- * Get Entrie(s) by id (Done)
+/** Get Entrie(s) by id (Done)
  * id: master, customer, entrie
- *
  */
 router.get('/entries/:id', function (req, res) {
 
@@ -118,30 +105,30 @@ router.get('/entries/:id', function (req, res) {
 
         query.exec(function (err, entrie) {
             if (!entrie) {
-                sendJSONresponse(res, 404, {
+                fmain.sendJSONresponse(res, 404, {
                     message: "Entrie(s) not found"
                 });
                 return;
             } else if (!entrie.length) {
-                sendJSONresponse(res, 404, {
+                fmain.sendJSONresponse(res, 404, {
                     message: "Entrie(s) not found"
                 });
                 return;
             } else if (err) {
-                sendJSONresponse(res, 404, err);
+                fmain.sendJSONresponse(res, 404, err);
                 return;
             }
-            sendJSONresponse(res, 200, entrie);
+            fmain.sendJSONresponse(res, 200, entrie);
         });
     } else {
-        sendJSONresponse(res, 404, {
+        fmain.sendJSONresponse(res, 404, {
             message: "no id in request"
         });
     }
 });
 
 // Modify Entrie
-// TODO: add check toren + role
+// TODO: add check token + role
 router.put('/entries/:id', function (req, res) {
 
     if (req.params && req.params.id) {
@@ -160,7 +147,7 @@ router.put('/entries/:id', function (req, res) {
                     sendJSONresponse(res, 404, err);
                     return;
                 } else if (err) {
-                    sendJSONresponse(res, 500, err);
+                    fmain.sendJSONresponse(res, 500, err);
                     return;
                 }
 
@@ -170,19 +157,19 @@ router.put('/entries/:id', function (req, res) {
                         .populate('customerId', '-password -ip -addedAt')
                         .exec(function (err, entrie) {
                             if (!entrie) {
-                                sendJSONresponse(res, 404, {
+                                fmain.sendJSONresponse(res, 404, {
                                     message: "entries not changed"
                                 });
                                 return;
                             } else if (err) {
-                                sendJSONresponse(res, 400, err);
+                                fmain.sendJSONresponse(res, 400, err);
                                 return;
                             }
-                            sendJSONresponse(res, 200, entrie);
+                            fmain.sendJSONresponse(res, 200, entrie);
                             return;
                         });
                 } else {
-                    sendJSONresponse(res, 404, {
+                    fmain.sendJSONresponse(res, 404, {
                         message: "entries not changed"
                     });
                     return;
@@ -191,7 +178,7 @@ router.put('/entries/:id', function (req, res) {
             });
 
     } else {
-        sendJSONresponse(res, 404, {
+        fmain.sendJSONresponse(res, 404, {
             message: "no id in request"
         });
     }
