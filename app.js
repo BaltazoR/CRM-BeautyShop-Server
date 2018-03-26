@@ -34,6 +34,7 @@ require('./models/db');
 
 let index = require('./routes/index');
 let users = require('./routes/users');
+let entries = require('./routes/entries');
 
 let app = express();
 
@@ -73,6 +74,7 @@ app.use(function (req, res, next) {
 
 app.use('/', index);
 app.use('/api', users);
+app.use('/api', entries);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

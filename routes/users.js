@@ -3,7 +3,8 @@
  * - создать контролер
  * --------------------
  * - привести в порядок роутер
- *   - добавить проверки всех входных данных
+ * - удалить lodash за ненадобностью
+ * - добавить в редактирвание защиту, проверка айди с токена и фронта
  */
 
 let express = require('express');
@@ -139,7 +140,12 @@ router.post('/login', function (req, res) {
                     return;
                 }
                 if (user && bcrypt.compareSync(req.body.password, user.password) && compare(user.email, req.body.email.toLowerCase())) {
-                    let token = createToken({ id: user._id, username: user.name, email: user.email });
+                    let token = createToken({
+                        id: user._id,
+                        role: user.role,
+                        username: user.name,
+                        email: user.email
+                    });
                     /*  res.cookie('token', token, {
                         httpOnly: true
                     }); */
@@ -261,6 +267,7 @@ router.get('/users/:id', function (req, res) {
 
 // Modify User (Done)
 router.put('/users/:id', checkAuth, function (req, res) {
+    console.log(req.user);
     if (req.params && req.params.id) {
         upload(req, res, function (err) {
             if (err) {
