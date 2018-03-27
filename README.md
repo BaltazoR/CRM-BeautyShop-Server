@@ -1,9 +1,9 @@
 # CRM BeautyShop (Backend)
 
 
-### ссылка на фронтэнд  beautyshop-server.herokuapp.com
+### ссылка на фронтэнд  [beautyshop-server.herokuapp.com](http://beautyshop-server.herokuapp.com)
 
-### API beautyshop-server.herokuapp.com/api/
+### API [beautyshop-server.herokuapp.com/api](http://beautyshop-server.herokuapp.com/api)
 
 # Routes for users:
 
@@ -15,14 +15,14 @@
 | post/users | создание нового пользователя |
 | get/users | вывод информации всех пользователей в базе |
 | get/users/id | вывод информации пользователя (по его id) |
-|
+
   
 ### C авторизацией:
 
 | ROUTE | DESCRIPTION |
 | ------ | ------ |
 | put/users/id | редактирование информации пользователя (по его id) |
-|
+
 
 
 
@@ -37,7 +37,7 @@
 | get/etries/id?q=masters | вывод информации всех записей мастера (по его id) |
 | get/etries/id?q=customers | вывод информации всех записей клиента (по его id) |
 | *** put/etries/id | редактирование записи (по её id) |
-|
+
   
 ### ** C авторизацией:
 
