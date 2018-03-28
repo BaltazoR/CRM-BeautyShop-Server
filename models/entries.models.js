@@ -30,7 +30,7 @@ let entriesSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        default: 'New' // new,Accepted, Completed, Rejected
+        default: 'New' // New, Accepted, Completed, Rejected
     },
     addedAt: {
         type: Date,

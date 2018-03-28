@@ -8,26 +8,26 @@ let Entries = require('../models/entries.models');
 let fmain = require('../functions/fmain');
 
 
-// Create Entrie (Done)
+// Create entry (Done)
 router.post('/entries', function (req, res) {
     if (req.body && req.body.masterId && req.body.customerId && req.body.date && req.body.time) {
-        entrie = Entries.create({
+        entry = Entries.create({
             masterId: req.body.masterId,
             customerId: req.body.customerId,
             date: req.body.date,
             time: req.body.time,
             masterComment: req.body.masterComment,
             customerComment: req.body.customerComment
-        }, function (err, entrie) {
+        }, function (err, entry) {
             if (err) {
                 fmain.sendJSONresponse(res, 400, err);
             } else {
-                if (entrie.id) {
-                    Entries.findById(entrie.id)
+                if (entry.id) {
+                    Entries.findById(entry.id)
                         .populate('masterId', '-password -ip -addedAt')
                         .populate('customerId', '-password -ip -addedAt')
-                        .exec(function (err, entrie) {
-                            if (!entrie) {
+                        .exec(function (err, entry) {
+                            if (!entry) {
                                 fmain.sendJSONresponse(res, 404, {
                                     message: "entries not create"
                                 });
@@ -36,7 +36,7 @@ router.post('/entries', function (req, res) {
                                 fmain.sendJSONresponse(res, 400, err);
                                 return;
                             }
-                            fmain.sendJSONresponse(res, 201, entrie);
+                            fmain.sendJSONresponse(res, 201, entry);
                             return;
                         });
                 } else {
@@ -82,8 +82,8 @@ router.get('/entries', function (req, res) {
         })
 });
 
-/** Get Entrie(s) by id (Done)
- * id: master, customer, entrie
+/** Get Entry(entries) by id (Done)
+ * id: master, customer, entry
  */
 router.get('/entries/:id', function (req, res) {
 
@@ -103,22 +103,22 @@ router.get('/entries/:id', function (req, res) {
 
         const query = getByIdQuery(queryParam, req.params.id);
 
-        query.exec(function (err, entrie) {
-            if (!entrie) {
+        query.exec(function (err, entry) {
+            if (!entry) {
                 fmain.sendJSONresponse(res, 404, {
-                    message: "Entrie(s) not found"
+                    message: "Entry(entries) not found"
                 });
                 return;
-            } else if (!entrie.length) {
+            } else if (!entry.length) {
                 fmain.sendJSONresponse(res, 404, {
-                    message: "Entrie(s) not found"
+                    message: "Entry(entries) not found"
                 });
                 return;
             } else if (err) {
                 fmain.sendJSONresponse(res, 404, err);
                 return;
             }
-            fmain.sendJSONresponse(res, 200, entrie);
+            fmain.sendJSONresponse(res, 200, entry);
         });
     } else {
         fmain.sendJSONresponse(res, 404, {
@@ -127,12 +127,12 @@ router.get('/entries/:id', function (req, res) {
     }
 });
 
-// Modify Entrie
+// Modify Entry
 // TODO: add check token + role
 router.put('/entries/:id', function (req, res) {
 
     if (req.params && req.params.id) {
-        let entrie = {
+        let entry = {
             date: req.body.date,
             time: req.body.time,
             status: req.body.status,
@@ -141,9 +141,9 @@ router.put('/entries/:id', function (req, res) {
         };
 
         Entries
-            .findByIdAndUpdate(req.params.id, entrie, { new: true }, function (err, entrie) {
+            .findByIdAndUpdate(req.params.id, entry, { new: true }, function (err, entry) {
 
-                if (!entrie) {
+                if (!entry) {
                     sendJSONresponse(res, 404, err);
                     return;
                 } else if (err) {
@@ -151,12 +151,12 @@ router.put('/entries/:id', function (req, res) {
                     return;
                 }
 
-                if (entrie.id) {
-                    Entries.findById(entrie.id)
+                if (entry.id) {
+                    Entries.findById(entry.id)
                         .populate('masterId', '-password -ip -addedAt')
                         .populate('customerId', '-password -ip -addedAt')
-                        .exec(function (err, entrie) {
-                            if (!entrie) {
+                        .exec(function (err, entry) {
+                            if (!entry) {
                                 fmain.sendJSONresponse(res, 404, {
                                     message: "entries not changed"
                                 });
@@ -165,7 +165,7 @@ router.put('/entries/:id', function (req, res) {
                                 fmain.sendJSONresponse(res, 400, err);
                                 return;
                             }
-                            fmain.sendJSONresponse(res, 200, entrie);
+                            fmain.sendJSONresponse(res, 200, entry);
                             return;
                         });
                 } else {
@@ -185,7 +185,7 @@ router.put('/entries/:id', function (req, res) {
 
 });
 
-// Get Entrie(s) by master id and date (Done)
+// Get Entry(entries) by master id and date (Done)
 router.get('/entries/master/:id', function (req, res) {
     if (req.params && req.params.id && req.query && req.query.date) {
         Entries
@@ -196,12 +196,12 @@ router.get('/entries/master/:id', function (req, res) {
 
                 if (!entries) {
                     fmain.sendJSONresponse(res, 404, {
-                        message: "Entrie(s) not found"
+                        message: "Entry(entries) not found"
                     });
                     return;
                 } else if (!entries.length) {
                     fmain.sendJSONresponse(res, 404, {
-                        message: "Entrie(s) on this date not found"
+                        message: "Entry(entries) on this date not found"
                     });
                     return;
                 } else if (err) {
