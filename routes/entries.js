@@ -185,5 +185,38 @@ router.put('/entries/:id', function (req, res) {
 
 });
 
+// Get Entrie(s) by master id and date (Done)
+router.get('/entries/master/:id', function (req, res) {
+    if (req.params && req.params.id && req.query && req.query.date) {
+        Entries
+            .find({ masterId: req.params.id, date: req.query.date })
+            .populate('masterId', '-password -ip -addedAt')
+            .populate('customerId', '-password -ip -addedAt')
+            .exec(function (err, entries) {
+
+                if (!entries) {
+                    fmain.sendJSONresponse(res, 404, {
+                        message: "Entrie(s) not found"
+                    });
+                    return;
+                } else if (!entries.length) {
+                    fmain.sendJSONresponse(res, 404, {
+                        message: "Entrie(s) on this date not found"
+                    });
+                    return;
+                } else if (err) {
+                    fmain.sendJSONresponse(res, 404, err);
+                    return;
+                }
+
+                fmain.sendJSONresponse(res, 200, entries);
+
+            });
+    } else {
+        fmain.sendJSONresponse(res, 404, {
+            message: "no id or date in request"
+        });
+    }
+});
 
 module.exports = router;
