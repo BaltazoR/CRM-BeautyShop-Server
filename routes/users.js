@@ -8,11 +8,12 @@ let express = require('express');
 let router = express.Router();
 let bcrypt = require('bcryptjs');
 let User = require('../models/users.models');
-//require('dotenv').config();
+require('dotenv').config();
 let fs = require('fs');
 let fmain = require('../functions/fmain');
 let fauth = require('../functions/fauth');
 let upload = require('../functions/fupload-ava');
+let AWS = require('aws-sdk');
 
 function getIp(req) {
     let ip = req.headers['x-forwarded-for'] ||
@@ -186,37 +187,92 @@ router.put('/users/:id', fauth.checkAuth, function (req, res) {
                 userInfo: req.body.userInfo,
                 password: bcrypt.hashSync(req.body.password, 12)
             }
-            console.log(req.file);
-            if (req.file) user.avatar = req.file.filename;
-
-            User
-                .findByIdAndUpdate(req.params.id, user, { new: true }, function (err, user) {
-                    if (!user) {
-                        fmain.sendJSONresponse(res, 404, err);
-                        return;
-                    } else if (err) {
-                        fmain.sendJSONresponse(res, 500, err);
-                        return;
-                    }
 
 
-                    if (req.file) {
-                        if (
-                            (fs.existsSync(req.file.destination + req.file.origFileName))
-                            && (req.file.origFileName !== 'def_customer.jpg')
-                            && (req.file.origFileName !== 'def_master.jpg')
-                        ) {
-                            fs.unlinkSync(req.file.destination + req.file.origFileName, (err) => {
-                                if (err) console.log(req.file.origFileName + ' not deleted');
-                            });
-                        } else {
-                            console.log(req.file.destination + req.file.origFileName + ' not found');
-                        }
-                    }
-
-                    fmain.sendJSONresponse(res, 200, userData(user));
-
+            if (req.file) {
+                user.avatar = req.file.filename;
+                AWS.config.update({
+                    accessKeyId: process.env.accessKeyId,
+                    secretAccessKey: process.env.secretAccessKey
                 });
+                let s3 = new AWS.S3();
+                fs.readFile(req.file.path, function (err, data) {
+                    if (err) { throw err; }
+                    let params = {
+                        Bucket: 'aws-avatars',
+                        Key: req.file.filename,
+                        ACL: 'public-read',
+                        ContentType: req.file.mimetype,
+                        Body: data
+                    };
+
+                    s3.putObject(params, function (err) {
+                        if (err) {
+                            fmain.sendJSONresponse(res, 500, err);
+                            return;
+                        } else {
+                            console.log('Successfully uploaded "' + req.file.filename + '" to AWS');
+
+                            fs.unlinkSync(req.file.path);
+
+                            User
+                                .findByIdAndUpdate(req.params.id, user, { new: true }, function (err, user) {
+                                    if (!user) {
+                                        fmain.sendJSONresponse(res, 404, err);
+                                        return;
+                                    } else if (err) {
+                                        fmain.sendJSONresponse(res, 500, err);
+                                        return;
+                                    }
+
+
+                                    if ((req.file.oldAvaName !== 'def_customer.jpg') && (req.file.oldAvaName !== 'def_master.jpg')) {
+                                        AWS.config.update({
+                                            accessKeyId: process.env.accessKeyId,
+                                            secretAccessKey: process.env.secretAccessKey
+                                        });
+                                        let s3 = new AWS.S3();
+                                        let params_del = {
+                                            Bucket: 'aws-avatars',
+                                            Delete: {
+                                                Objects: [
+                                                    {
+                                                        Key: req.file.oldAvaName
+                                                    }
+                                                ],
+                                                Quiet: false
+                                            }
+                                        };
+
+                                        s3.deleteObjects(params_del, function (err, data) {
+                                            if (err) {
+                                                console.log(err, err.stack);
+                                            }else {
+                                                let delOldFile = data.Deleted;
+                                                console.log('File', delOldFile[0].Key, 'was deleted from AWS');
+                                            }
+                                        });
+                                    }
+                                    fmain.sendJSONresponse(res, 200, userData(user));
+                                    return;
+                                });
+                        }
+                    });
+                });
+            } else {
+                User
+                    .findByIdAndUpdate(req.params.id, user, { new: true }, function (err, user) {
+                        if (!user) {
+                            fmain.sendJSONresponse(res, 404, err);
+                            return;
+                        } else if (err) {
+                            fmain.sendJSONresponse(res, 500, err);
+                            return;
+                        }
+                        fmain.sendJSONresponse(res, 200, userData(user));
+                        return;
+                    });
+            }
         });
     } else {
         fmain.sendJSONresponse(res, 404, {
