@@ -5,7 +5,7 @@ let User = require('../models/users.models');
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
         //cb(null, './public/images/avatars/');
-        cb(null, './ava_temp_folder/');
+        cb(null, './tmp/');
     },
 
     filename: function (req, file, cb) {
