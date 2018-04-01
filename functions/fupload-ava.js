@@ -4,8 +4,8 @@ let User = require('../models/users.models');
 
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        //cb(null, './public/images/avatars/');
-        cb(null, './tmp/');
+        cb(null, './public/images/avatars/');
+        //cb(null, './tmp/');
     },
 
     filename: function (req, file, cb) {
