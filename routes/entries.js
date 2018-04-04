@@ -199,11 +199,11 @@ router.get('/entries/master/:id', function (req, res) {
                         message: "Entry(entries) not found"
                     });
                     return;
-                } else if (!entries.length) {
-                    fmain.sendJSONresponse(res, 404, {
-                        message: "Entry(entries) on this date not found"
-                    });
-                    return;
+                    /*                 } else if (!entries.length) {
+                                        fmain.sendJSONresponse(res, 404, {
+                                            message: "Entry(entries) on this date not found"
+                                        });
+                                        return; */
                 } else if (err) {
                     fmain.sendJSONresponse(res, 404, err);
                     return;
