@@ -34,8 +34,8 @@
 | post/entries | создать запись |
 | get/entries | вывод информации всех записей |
 | get/entries/id | вывод информации одной записи (по её id) |
-| get/entries/id?q=masters | вывод информации всех записей мастера (по его id) |
-| get/entries/id?q=customers | вывод информации всех записей клиента (по его id) |
+| get/entries/id?q=master | вывод информации всех записей мастера (по его id) |
+| get/entries/id?q=customer | вывод информации всех записей клиента (по его id) |
 | /entries/master/id?date='XX.XX.XXXX' | вывод всех записей мастера (по его id) на выбранную дату |
 | *** put/entries/id | редактирование записи (по её id) |
 

@@ -98,8 +98,8 @@ router.get('/entries/:id', function (req, res) {
 
         let queryParam = req.query.q;
         if (req.query.q === undefined) queryParam = '_id';
-        if (req.query.q === 'masters') queryParam = 'masterId';
-        if (req.query.q === 'customers') queryParam = 'customerId';
+        if (req.query.q === 'master') queryParam = 'masterId';
+        if (req.query.q === 'customer') queryParam = 'customerId';
 
         const query = getByIdQuery(queryParam, req.params.id);
 
