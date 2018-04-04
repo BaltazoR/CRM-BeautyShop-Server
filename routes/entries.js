@@ -16,7 +16,7 @@ router.post('/entries', function (req, res) {
             customerId: req.body.customerId,
             date: req.body.date,
             time: req.body.time,
-            masterComment: req.body.masterComment,
+            //masterComment: req.body.masterComment,
             customerComment: req.body.customerComment
         }, function (err, entry) {
             if (err) {
@@ -109,11 +109,11 @@ router.get('/entries/:id', function (req, res) {
                     message: "Entry(entries) not found"
                 });
                 return;
-            } else if (!entry.length) {
-                fmain.sendJSONresponse(res, 404, {
-                    message: "Entry(entries) not found"
-                });
-                return;
+                /*             } else if (!entry.length) {
+                                fmain.sendJSONresponse(res, 404, {
+                                    message: "Entry(entries) not found"
+                                });
+                                return; */
             } else if (err) {
                 fmain.sendJSONresponse(res, 404, err);
                 return;
