@@ -1,6 +1,6 @@
 let express = require('express');
 let router = express.Router();
-//let User = require('../models/users.models');
+let User = require('../models/users.models');
 let Entries = require('../models/entries.models');
 //require('dotenv').config();
 //let passport = require('passport');
@@ -211,6 +211,53 @@ router.get('/entries/master/:id', function (req, res) {
 
                 fmain.sendJSONresponse(res, 200, entries);
 
+            });
+    } else {
+        fmain.sendJSONresponse(res, 404, {
+            message: "no id or date in request"
+        });
+    }
+});
+
+// Get Entry(entries) by master or customer id and date (Done)
+router.get('/entries/user/:id', function (req, res) {
+    if (req.params && req.params.id && req.query && req.query.date) {
+        User
+            .findById(req.params.id)
+            .exec(function (err, user) {
+                if (!user) {
+                    fmain.sendJSONresponse(res, 404, {
+                        message: "User not found"
+                    });
+                    return;
+                } else if (err) {
+                    fmain.sendJSONresponse(res, 404, err);
+                    return;
+                }
+
+                let userId;
+                if (user.role === 'master') userId = 'masterId';
+                if (user.role === 'customer') userId = 'customerId';
+
+                Entries
+                    .find({ [userId]: req.params.id, date: req.query.date })
+                    .populate('masterId', '-password -ip -addedAt')
+                    .populate('customerId', '-password -ip -addedAt')
+                    .exec(function (err, entries) {
+
+                        if (!entries) {
+                            fmain.sendJSONresponse(res, 404, {
+                                message: "Entry(entries) not found"
+                            });
+                            return;
+                        } else if (err) {
+                            fmain.sendJSONresponse(res, 404, err);
+                            return;
+                        }
+
+                        fmain.sendJSONresponse(res, 200, entries);
+
+                    });
             });
     } else {
         fmain.sendJSONresponse(res, 404, {
