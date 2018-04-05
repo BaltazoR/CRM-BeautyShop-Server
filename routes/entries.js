@@ -133,11 +133,11 @@ router.put('/entries/:id', function (req, res) {
 
     if (req.params && req.params.id) {
         let entry = {
-            date: req.body.date,
-            time: req.body.time,
+            //date: req.body.date,
+            //time: req.body.time,
             status: req.body.status,
             masterComment: req.body.masterComment,
-            customerComment: req.body.customerComment
+            //customerComment: req.body.customerComment
         };
 
         Entries
