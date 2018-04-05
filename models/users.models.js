@@ -23,6 +23,7 @@ let userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
+        enum: ['master', 'customer'],
         required: true
     },
     avatar: String,

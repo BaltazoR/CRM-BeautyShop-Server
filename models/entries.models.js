@@ -30,7 +30,9 @@ let entriesSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        default: 'New' // New, Accepted, Completed, Rejected
+        enum: ['New', 'Accepted', 'Completed', 'Rejected'],
+        default: 'New',
+        required: true
     },
     addedAt: {
         type: Date,
