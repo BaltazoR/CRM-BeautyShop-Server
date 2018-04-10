@@ -6,6 +6,7 @@ let Entries = require('../models/entries.models');
 //let passport = require('passport');
 //let jwt = require('jsonwebtoken');
 let fmain = require('../functions/fmain');
+let fauth = require('../functions/fauth');
 
 
 // Create entry (Done)
@@ -129,16 +130,27 @@ router.get('/entries/:id', function (req, res) {
 
 // Modify Entry
 // TODO: add check token + role
-router.put('/entries/:id', function (req, res) {
+router.put('/entries/:id', fauth.checkAuth, function (req, res) {
+    if (req.params && req.params.id && req.user && req.user.role) {
 
-    if (req.params && req.params.id) {
-        let entry = {
-            //date: req.body.date,
-            //time: req.body.time,
-            status: req.body.status,
-            masterComment: req.body.masterComment,
-            //customerComment: req.body.customerComment
-        };
+        let entry = {};
+        if (req.user.role === 'master') {
+            entry = {
+                //date: req.body.date,
+                //time: req.body.time,
+                status: req.body.status,
+                masterComment: req.body.masterComment,
+                //customerComment: req.body.customerComment
+            };
+        } else if (req.user.role === 'customer') {
+            entry = {
+                //date: req.body.date,
+                //time: req.body.time,
+                status: req.body.status,
+                //masterComment: req.body.masterComment,
+                customerComment: req.body.customerComment
+            };
+        }
 
         Entries
             .findByIdAndUpdate(req.params.id, entry, { new: true }, function (err, entry) {
