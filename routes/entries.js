@@ -7,7 +7,12 @@ let Entries = require('../models/entries.models');
 //let jwt = require('jsonwebtoken');
 let fmain = require('../functions/fmain');
 let fauth = require('../functions/fauth');
+let sgMail = require('@sendgrid/mail');
+let userUrl = 'http://127.0.0.1:4200/users/';
 
+if (process.env.NODE_ENV === 'production') {
+    userUrl = 'http://beauty-shop.s3-website.eu-central-1.amazonaws.com/users/';
+}
 
 // Create entry (Done)
 router.post('/entries', function (req, res) {
@@ -128,12 +133,12 @@ router.get('/entries/:id', function (req, res) {
     }
 });
 
-// Modify Entry
-// TODO: add check token + role
+// Modify Entry (Done)
 router.put('/entries/:id', fauth.checkAuth, function (req, res) {
     if (req.params && req.params.id && req.user && req.user.role) {
 
         let entry = {};
+        let addressee;
         if (req.user.role === 'master') {
             entry = {
                 //date: req.body.date,
@@ -142,6 +147,7 @@ router.put('/entries/:id', fauth.checkAuth, function (req, res) {
                 masterComment: req.body.masterComment,
                 //customerComment: req.body.customerComment
             };
+            addressee = 'customer';
         } else if (req.user.role === 'customer') {
             entry = {
                 //date: req.body.date,
@@ -150,6 +156,7 @@ router.put('/entries/:id', fauth.checkAuth, function (req, res) {
                 //masterComment: req.body.masterComment,
                 customerComment: req.body.customerComment
             };
+            addressee = 'master';
         }
 
         Entries
@@ -177,7 +184,62 @@ router.put('/entries/:id', fauth.checkAuth, function (req, res) {
                                 fmain.sendJSONresponse(res, 400, err);
                                 return;
                             }
+
                             fmain.sendJSONresponse(res, 200, entry);
+
+                            sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+                            let emailMsg = {
+                                //to: 'beautyshop@mailinator.com',
+                                from: 'no-reply@beutyshop.com',
+                                //subject: 'Your order status has been changed to ' + entry.status,
+                                subject: 'Your order status has been changed',
+                                //text: 'Entry on \r\n' + 'date: ' + entry.date + ' time: ' + entry.time + '\r\n'
+                                text: 'Entry on: ' + entry.date + ' at ' + entry.time + '\r\n',
+                                html: `<p>Entry on: ${entry.date}  at ${entry.time}</p>`
+                            };
+
+
+                            if (addressee === 'master') {
+                                emailMsg.to = entry.masterId.email;
+
+                                emailMsg.text += 'Customer name: ' + entry.customerId.name + '\r\n';
+                                emailMsg.html += '<p>Customer name: <a href="' + userUrl + entry.customerId.id + '/">' + entry.customerId.name + '<a></p>';
+
+                                emailMsg.text += 'Customer phone number: ' + entry.customerId.phoneNumber + '\r\n';
+                                emailMsg.html += '<p>Customer phone number: ' + entry.customerId.phoneNumber + '</p>';
+
+                                emailMsg.text += 'Status has been changed to : ' + entry.status + '\r\n';
+                                emailMsg.html += '<p>Status has been changed to : <b>' + entry.status + '</b></p>';
+
+                                if (entry.customerComment.length > 0) {
+                                    emailMsg.text += 'comment for entry: ' + entry.customerComment;
+                                    emailMsg.html += '<p>comment for entry: ' + entry.customerComment + '</p>';
+                                }
+
+                            } else if (addressee === 'customer') {
+                                emailMsg.to = entry.customerId.email;
+
+                                emailMsg.text += 'Master name: ' + entry.masterId.name + '\r\n';
+                                emailMsg.html += '<p>Master name: <a href="' + userUrl + entry.masterId.id + '/">' + entry.masterId.name + '<a></p>';
+
+                                emailMsg.text += 'Master phone number: ' + entry.masterId.phoneNumber + '\r\n';
+                                emailMsg.html += '<p>Master phone number: ' + entry.masterId.phoneNumber + '</p>';
+
+                                emailMsg.text += 'Status has been changed to : ' + entry.status + '\r\n';
+                                emailMsg.html += '<p>Status has been changed to : <b>' + entry.status + '</b></p>';
+
+                                if (entry.masterComment.length > 0) {
+                                    emailMsg.text += 'comment for entry: ' + entry.masterComment;
+                                    emailMsg.html += '<p>comment for entry: ' + entry.masterComment + '</p>';
+                                }
+
+                            } else {
+                                console.log('Email not send');
+                                return;
+                            }
+
+                            sgMail.send(emailMsg);
+
                             return;
                         });
                 } else {
@@ -197,7 +259,7 @@ router.put('/entries/:id', fauth.checkAuth, function (req, res) {
 
 });
 
-// Get Entry(entries) by master id and date (Done)
+// Get Entry(entries) by master id and date (Deprecated)
 router.get('/entries/master/:id', function (req, res) {
     if (req.params && req.params.id && req.query && req.query.date) {
         Entries
