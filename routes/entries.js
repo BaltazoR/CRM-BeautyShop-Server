@@ -1,3 +1,7 @@
+/**
+ * TODO:
+ * добавить проверку при создании записи - на одно и тоже время
+ */
 let express = require('express');
 let router = express.Router();
 let User = require('../models/users.models');
