@@ -13,15 +13,10 @@ let fs = require('fs');
 let fmain = require('../functions/fmain');
 let fauth = require('../functions/fauth');
 let upload = require('../functions/fupload-ava');
+let fsend = require('../functions/fsend-email');
 let AWS = require('aws-sdk');
+let recoveryToken = require('jsonwebtoken');
 
-function getIp(req) {
-    let ip = req.headers['x-forwarded-for'] ||
-        req.connection.remoteAddress ||
-        req.socket.remoteAddress ||
-        (req.connection.socket ? req.connection.socket.remoteAddress : null);
-    return ip.replace(/::ffff:/, '');
-}
 
 function userData(user) {
     return user = {
@@ -108,7 +103,7 @@ router.post('/users', function (req, res) {
                     phoneNumber: req.body.phoneNumber,
                     role: req.body.role,
                     avatar: avatar,
-                    ip: getIp(req)
+                    ip: fmain.getIp(req)
                 }, function (err, user) {
                     if (err) {
                         fmain.sendJSONresponse(res, 400, err);
@@ -247,7 +242,7 @@ router.put('/users/:id', fauth.checkAuth, function (req, res) {
                                         s3.deleteObjects(params_del, function (err, data) {
                                             if (err) {
                                                 console.log(err, err.stack);
-                                            }else {
+                                            } else {
                                                 let delOldFile = data.Deleted;
                                                 console.log('File', delOldFile[0].Key, 'was deleted from AWS');
                                             }
@@ -280,6 +275,93 @@ router.put('/users/:id', fauth.checkAuth, function (req, res) {
         });
     }
 
+});
+
+// Send Email for recovery password
+router.post('/recovery', function (req, res) {
+    if (req.body && req.body.email) {
+
+        if (!fmain.validateEmail(req.body.email)) {
+            fmain.sendJSONresponse(res, 400, {
+                message: "You entered not a E-mail"
+            });
+            return;
+        }
+
+        User
+            .findOne({ email: req.body.email }, function (err, user) {
+                if (err) {
+                    fmain.sendJSONresponse(res, 400, err);
+                    return;
+                }
+                if (!user) {
+                    fmain.sendJSONresponse(res, 400, {
+                        message: "User with this email not found"
+                    });
+                    return;
+                }
+
+                let subject = 'Request for password recovery';
+                let token = fauth.createRecoveryToken({
+                    email: user.email
+                });
+                let emailBody = fsend.templateEmailReqPass(fmain.getIp(req), token);
+                fsend.sendEmail(user.email, subject, emailBody.text, emailBody.html);
+
+                fmain.sendJSONresponse(res, 200, {
+                    "message": 'Email successfully sent'
+                });
+            });
+    } else {
+        fmain.sendJSONresponse(res, 400, {
+            "message": "Required field must be filled"
+        });
+    }
+});
+
+
+// Set new password from Email
+router.put('/setpass/', function (req, res) {
+    if (req.body && req.body.token && req.body.newpassword) {
+        if (req.body.newpassword === ' ') {
+            fmain.sendJSONresponse(res, 404, {
+                "message": 'The password must not be empty'
+            });
+            return;
+        }
+        recoveryToken.verify(req.body.token, process.env.secretOrKey, function (err, decoded) {
+            if (err) {
+                fmain.sendJSONresponse(res, 403, {
+                    "message": err.message
+                });
+                console.log(err.message);
+                return;
+            }
+            let user = {
+                password: bcrypt.hashSync(req.body.newpassword, 12)
+            };
+
+            User
+                .findOneAndUpdate({ email: decoded.email }, user, { new: true }, function (err, user) {
+                    if (!user) {
+                        fmain.sendJSONresponse(res, 404, err);
+                        return;
+                    } else if (err) {
+                        fmain.sendJSONresponse(res, 500, err);
+                        return;
+                    }
+
+                    fmain.sendJSONresponse(res, 200, {
+                        "message": 'New password set successfully'
+                    });
+                });
+        });
+
+    } else {
+        fmain.sendJSONresponse(res, 404, {
+            message: "The password must not be empty"
+        });
+    }
 });
 
 

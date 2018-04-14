@@ -1,63 +1,90 @@
 let sgMail = require('@sendgrid/mail');
-let userUrl = 'http://127.0.0.1:4200/users/';
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+let fmain = require('../functions/fmain');
+let baseUrl = 'http://127.0.0.1:4200/';
 
 if (process.env.NODE_ENV === 'production') {
-    userUrl = 'http://beauty-shop.s3-website.eu-central-1.amazonaws.com/users/';
+    baseUrl = 'http://beauty-shop.s3-website.eu-central-1.amazonaws.com/';
 }
 
-module.exports.sendEmail = function (addressee, entry, subject, withoutStatus) {
-    if (subject === undefined) subject = 'Your order status has been changed';
-    let emailMsg = {
-        from: 'no-reply@beutyshop.com',
+
+module.exports.sendEmail = function (to, subject, text, html, from) {
+    if (from === undefined) from = 'no-reply@beutyshop.com';
+    const msg = {
+        to: to,
+        from: from,
         subject: subject,
-        text: 'Entry on: ' + entry.date + ' at ' + entry.time + '\r\n',
-        html: `<p>Entry on: ${entry.date}  at ${entry.time}</p>`
+        text: text,
+        html: html,
     };
+    sgMail.send(msg);
+}
 
-    if (addressee === 'master') {
-        emailMsg.to = entry.masterId.email;
+module.exports.templateEmailOrder = function (entry, role, withoutStatus) {
 
-        emailMsg.text += 'Customer name: ' + entry.customerId.name + '\r\n';
-        emailMsg.html += '<p>Customer name: <a href="' + userUrl + entry.customerId.id + '/">' + entry.customerId.name + '<a></p>';
+    let text = 'Entry on: ' + entry.date + ' at ' + entry.time + '\r\n';
+    let html = `<p>Entry on: ${entry.date}  at ${entry.time}</p>`;
 
-        emailMsg.text += 'Customer phone number: ' + entry.customerId.phoneNumber + '\r\n';
-        emailMsg.html += '<p>Customer phone number: ' + entry.customerId.phoneNumber + '</p>';
+    if (role === 'master') {
+
+        text += 'Customer name: ' + entry.customerId.name + '\r\n';
+        html += '<p>Customer name: <a href="' + baseUrl + 'users/' + entry.customerId.id + '/">' + entry.customerId.name + '<a></p>';
+
+        text += 'Customer phone number: ' + entry.customerId.phoneNumber + '\r\n';
+        html += '<p>Customer phone number: ' + entry.customerId.phoneNumber + '</p>';
 
         if (withoutStatus === undefined) {
-            emailMsg.text += 'Status has been changed to : ' + entry.status + '\r\n';
-            emailMsg.html += '<p>Status has been changed to : <b>' + entry.status + '</b></p>';
+            text += 'Status has been changed to : ' + entry.status + '\r\n';
+            html += '<p>Status has been changed to : <b>' + entry.status + '</b></p>';
         }
-
 
         if (entry.customerComment.length > 0) {
-            emailMsg.text += 'comment for entry: ' + entry.customerComment;
-            emailMsg.html += '<p>comment for entry: ' + entry.customerComment + '</p>';
+            text += 'comment for entry: ' + entry.customerComment;
+            html += '<p>comment for entry: ' + entry.customerComment + '</p>';
         }
 
-    } else if (addressee === 'customer') {
-        emailMsg.to = entry.customerId.email;
+    } else if (role === 'customer') {
 
-        emailMsg.text += 'Master name: ' + entry.masterId.name + '\r\n';
-        emailMsg.html += '<p>Master name: <a href="' + userUrl + entry.masterId.id + '/">' + entry.masterId.name + '<a></p>';
+        text += 'Master name: ' + entry.masterId.name + '\r\n';
+        html += '<p>Master name: <a href="' + baseUrl + 'users/' + entry.masterId.id + '/">' + entry.masterId.name + '<a></p>';
 
-        emailMsg.text += 'Master phone number: ' + entry.masterId.phoneNumber + '\r\n';
-        emailMsg.html += '<p>Master phone number: ' + entry.masterId.phoneNumber + '</p>';
+        text += 'Master phone number: ' + entry.masterId.phoneNumber + '\r\n';
+        html += '<p>Master phone number: ' + entry.masterId.phoneNumber + '</p>';
 
         if (withoutStatus === undefined) {
-            emailMsg.text += 'Status has been changed to : ' + entry.status + '\r\n';
-            emailMsg.html += '<p>Status has been changed to : <b>' + entry.status + '</b></p>';
+            text += 'Status has been changed to : ' + entry.status + '\r\n';
+            html += '<p>Status has been changed to : <b>' + entry.status + '</b></p>';
         }
+
 
         if (entry.masterComment.length > 0) {
-            emailMsg.text += 'comment for entry: ' + entry.masterComment;
-            emailMsg.html += '<p>comment for entry: ' + entry.masterComment + '</p>';
+            text += 'comment for entry: ' + entry.masterComment;
+            html += '<p>comment for entry: ' + entry.masterComment + '</p>';
         }
-    } else {
-        console.log('Email not send');
-        return;
     }
-
-    sgMail.send(emailMsg);
+    return {
+        text: text,
+        html: html
+    }
 }
 
+module.exports.templateEmailReqPass = function (ip, token) {
+    text = `
+You have requested password recovery from ip: ${ip}.
+Please follow this link:
+${baseUrl}${token}
+to reset your password.
+---
+If it was not you, do not react to this letter.
+`;
+    html = `
+<p>You have requested password recovery from ip: ${ip}.</p>
+<p>Please follow this <a href="${baseUrl}?token=${token}">link</a> to reset your password.</p>
+<hr>
+<font color = "red"><b>If it was not you, do not react to this letter.</b></font>
+`;
+    return {
+        text: text,
+        html: html
+    }
+}

@@ -41,11 +41,15 @@ router.post('/entries', function (req, res) {
                                 fmain.sendJSONresponse(res, 400, err);
                                 return;
                             }
+
                             fmain.sendJSONresponse(res, 201, entry);
-                            let addressee = 'master';
+
+                            // send Email
+                            let to = entry.masterId.email;
                             let subject = 'You have new order';
-                            let withoutStatus = 1;
-                            fsend.sendEmail(addressee, entry, subject, withoutStatus);
+                            let emailBody = fsend.templateEmailOrder(entry, 'master', 1);
+                            fsend.sendEmail(to, subject, emailBody.text, emailBody.html);
+
                             return;
                         });
                 } else {
@@ -189,7 +193,20 @@ router.put('/entries/:id', fauth.checkAuth, function (req, res) {
                             }
 
                             fmain.sendJSONresponse(res, 200, entry);
-                            fsend.sendEmail(addressee, entry);
+
+                            // send Email
+                            let to;
+                            if (addressee === 'master') {
+                                to = entry.masterId.email;
+                            } else if (addressee === 'customer'){
+                                to = entry.customerId.email;
+                            } else {
+                                console.log('Unknown addressee');
+                                return;
+                            }
+                            let subject = 'Your order status has been changed';
+                            let emailBody = fsend.templateEmailOrder(entry, addressee);
+                            fsend.sendEmail(to, subject, emailBody.text, emailBody.html);
 
                             return;
                         });

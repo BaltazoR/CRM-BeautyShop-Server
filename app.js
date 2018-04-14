@@ -8,20 +8,10 @@ let bodyParser = require('body-parser');
 
 let passport = require('passport');
 let { Strategy } = require('passport-jwt');
-
-
-function ExtractJwt(req) {
-    let token = null;
-    //if (req.cookies && req.cookies.token != void (0)) token = req.cookies.token;
-    //if (req.body && req.body.token != void (0)) token = req.body.token;
-    if (req.get('Authorization') != void (0)) token = req.get('Authorization');
-    // slice 'Bearer '
-    token = token.slice(7);
-    return token;
-}
+let fauth = require('./functions/fauth');
 
 let jwt = {
-    jwtFromRequest: ExtractJwt,
+    jwtFromRequest: fauth.ExtractJwt,
     secretOrKey: process.env.secretOrKey
 };
 
