@@ -79,7 +79,7 @@ If it was not you, do not react to this letter.
 `;
     html = `
 <p>You have requested password recovery from ip: ${ip}.</p>
-<p>Please follow this <a href="${baseUrl}?token=${token}">link</a> to reset your password.</p>
+<p>Please follow this <a href="${baseUrl}update-password?token=${token}">link</a> to reset your password.</p>
 <hr>
 <font color = "red"><b>If it was not you, do not react to this letter.</b></font>
 `;
