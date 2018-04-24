@@ -25,7 +25,7 @@ router.post('/subscribe', function (req, res) {
         const payload = JSON.stringify({
             title: 'Welcome',
             body: 'Thank you for enabling push notifications',
-            icon: '/push-icon.png'
+            icon: 'https://s3.eu-central-1.amazonaws.com/aws-avatars/push-icon.png'
         });
 
         const options = {
