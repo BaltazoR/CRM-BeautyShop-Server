@@ -49,7 +49,7 @@ router.post('/subscribe', function (req, res) {
         }).catch(err => {
             console.error("Unable to send welcome push notification", err);
         });
-        res.status(200).send('subscribe');
+        res.status(200).json({status: 'subscribe'});
         return;
     });
 });
