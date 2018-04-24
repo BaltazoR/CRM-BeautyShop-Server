@@ -23,6 +23,7 @@
     "passport": "^0.4.0",
     "passport-jwt": "^3.0.1",
     "serve-favicon": "~2.4.5",
-    "uniqid": "^4.1.1"
+    "uniqid": "^4.1.1",
+    "web-push": "^3.3.0"
   }
 }

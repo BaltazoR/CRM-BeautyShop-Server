@@ -5,6 +5,7 @@ let favicon = require('serve-favicon');
 let logger = require('morgan');
 let cookieParser = require('cookie-parser');
 let bodyParser = require('body-parser');
+let webpush = require('web-push');
 
 let passport = require('passport');
 let { Strategy } = require('passport-jwt');
@@ -14,6 +15,12 @@ let jwt = {
     jwtFromRequest: fauth.ExtractJwt,
     secretOrKey: process.env.secretOrKey
 };
+
+webpush.setVapidDetails(
+    `mailto:${process.env.VAPID_email}`,
+    process.env.VAPID_public_Key,
+    process.env.VAPID_private_Key
+);
 
 passport.use(new Strategy(jwt, function (jwt_payload, done) {
     if (jwt_payload != void (0)) return done(false, jwt_payload);
@@ -25,6 +32,7 @@ require('./models/db');
 let index = require('./routes/index');
 let users = require('./routes/users');
 let entries = require('./routes/entries');
+let push = require('./routes/push');
 
 let app = express();
 

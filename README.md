@@ -54,3 +54,12 @@
 
 \* deprecated
 
+# Routes push:
+### Без авторизации:
+
+| ROUTE | DESCRIPTION |
+| ------------ | ------------ |
+| post /subscribe | подписаться на WebPush уведомления |
+| post /unsubscribe | отписаться от WebPush уведомлений |
+
+
