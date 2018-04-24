@@ -69,3 +69,5 @@ router.post('/unsubscribe', function (req, res) {
         res.status(200).send('unsubscribe');
     });
 });
+
+module.exports = router;
