@@ -18,7 +18,7 @@ router.post('/subscribe', function (req, res) {
     push.save(function (err, push) {
         if (err) {
             console.error('error with subscribe', error);
-            res.status(500).send({status: 'subscription not possible'});
+            res.status(500).json({status: 'subscription not possible'});
             return;
         }
 
@@ -62,7 +62,7 @@ router.post('/unsubscribe', function (req, res) {
     Push.findOneAndRemove({ endpoint: endpoint }, function (err, data) {
         if (err) {
             console.error('error with unsubscribe', error);
-            res.status(500).send({status: 'unsubscription not possible'});
+            res.status(500).json({status: 'unsubscription not possible'});
         }
         console.log(data);
         console.log('unsubscribed');
