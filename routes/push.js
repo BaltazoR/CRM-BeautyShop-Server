@@ -5,13 +5,11 @@ let Push = require('../models/push.models');
 
 router.post('/subscribe', function (req, res) {
 
-    const endpoint = req.body;
-
-    const push = new Push({
-        endpoint: endpoint.endpoint,
+    let push = new Push({
+        endpoint: req.body.endpoint,
         keys: {
-            p256dh: endpoint.keys.p256dh,
-            auth: endpoint.keys.auth
+            p256dh: req.body.keys.p256dh,
+            auth: req.body.keys.auth
         }
     });
 
@@ -22,30 +20,30 @@ router.post('/subscribe', function (req, res) {
             return;
         }
 
-        const notificationPayload = {
+        let notificationPayload = {
             "notification": {
                 "title": "Welcome",
                 "body": "Thank you for enabling push notifications",
                 "icon": "https://s3.eu-central-1.amazonaws.com/aws-avatars/push-icon.png",
-                "vibrate": [100, 50, 100],
-                "data": {
-                    "dateOfArrival": Date.now(),
-                    "primaryKey": 1
-                },
-                "actions": [{
-                    "action": "explore",
-                    "title": "Go to the site"
-                }]
+                /* "vibrate": [100, 50, 100],
+                        "data": {
+                            "dateOfArrival": Date.now(),
+                            "primaryKey": 1
+                        },
+                        "actions": [{
+                            "action": "explore",
+                            "title": "Go to the site"
+                        }] */
             }
         };
 
-        const payload = JSON.stringify(notificationPayload);
+        let payload = JSON.stringify(notificationPayload);
 
-        const options = {
+        let options = {
             TTL: 86400 // 3 days
         };
 
-        const subscription = {
+        let subscription = {
             endpoint: push.endpoint,
             keys: {
                 p256dh: push.keys.p256dh,
@@ -53,7 +51,7 @@ router.post('/subscribe', function (req, res) {
             }
         };
 
-        setInterval(
+        setTimeout(
             function () {
                 webPush.sendNotification(
                     subscription,
@@ -64,7 +62,7 @@ router.post('/subscribe', function (req, res) {
                 }).catch(err => {
                     console.error("Unable to send welcome push notification", err);
                 });
-            }, 10000
+            }, 5000
         );
 
         res.status(200).json({ status: 'subscribe' });
@@ -76,7 +74,7 @@ router.post('/subscribe', function (req, res) {
 
 router.post('/unsubscribe', function (req, res) {
 
-    const endpoint = req.body.endpoint;
+    let endpoint = req.body.endpoint;
 
     Push.findOneAndRemove({ endpoint: endpoint }, function (err, data) {
         if (err) {
