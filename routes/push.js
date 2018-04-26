@@ -26,7 +26,7 @@ router.post('/subscribe', function (req, res) {
             "notification": {
                 "title": "Welcome",
                 "body": "Thank you for enabling push notifications",
-                "icon": "/images/push-icon.png",
+                "icon": "images/push-icon.png",
                 "vibrate": [100, 50, 100],
                 "data": {
                     "dateOfArrival": Date.now(),
