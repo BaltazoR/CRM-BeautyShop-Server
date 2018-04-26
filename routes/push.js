@@ -3,27 +3,19 @@ let router = express.Router();
 let fmain = require('../functions/fmain');
 let webPush = require('web-push');
 let Push = require('../models/push.models');
+let fauth = require('../functions/fauth');
 
 // User subscribe
-router.post('/subscribe', function (req, res) {
-
-    console.log(req.body);
+router.post('/subscribe', fauth.checkAuth, function (req, res) {
 
     let push = new Push({
-        userId: req.body.userId,
+        userId: req.user.id,
         endpoint: req.body.endpoint,
         keys: {
             p256dh: req.body.keys.p256dh,
             auth: req.body.keys.auth
         }
     });
-
-    res.status(200).json({
-        body: req.body,
-        push: push
-    });
-
-    return;
 
     push.save(function (err, push) {
         if (err) {
@@ -89,7 +81,7 @@ router.post('/subscribe', function (req, res) {
 });
 
 // User unsubscribe
-router.post('/unsubscribe', function (req, res) {
+router.post('/unsubscribe', fauth.checkAuth, function (req, res) {
 
     let endpoint = req.body.endpoint;
 
