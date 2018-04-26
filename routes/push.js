@@ -8,6 +8,7 @@ let Push = require('../models/push.models');
 router.post('/subscribe', function (req, res) {
 
     let push = new Push({
+        userId: req.body.userId,
         endpoint: req.body.endpoint,
         keys: {
             p256dh: req.body.keys.p256dh,
