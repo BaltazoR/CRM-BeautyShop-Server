@@ -4,7 +4,7 @@ let pushSchema = new mongoose.Schema({
     userId: {
         type: String,
         //required: true,
-        unique: true
+        //unique: true
     },
     endpoint: String,
     keys: {
