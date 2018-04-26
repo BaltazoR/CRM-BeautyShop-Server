@@ -17,7 +17,7 @@ router.post('/subscribe', function (req, res) {
 
     push.save(function (err, push) {
         if (err) {
-            console.error('error with subscribe', error);
+            console.error('error with subscribe', err);
             res.status(500).json({ status: 'subscription not possible' });
             return;
         }
