@@ -8,8 +8,7 @@ module.exports.ExtractJwt = function (req) {
     //if (req.body && req.body.token != void (0)) token = req.body.token;
     if (req.get('Authorization') != void (0)) token = req.get('Authorization');
     // slice 'Bearer '
-    console.log(token);
-    token = token.slice(7);
+    if (token !== null) token = token.slice(7);
     return token;
 }
 
