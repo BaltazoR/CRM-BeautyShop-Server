@@ -56,7 +56,8 @@ router.post('/entries', function (req, res) {
                             Push
                                 .findOne({ userId: entry.masterId._id }, function (err, user) {
                                     if (err) {
-                                        fmain.sendJSONresponse(res, 400, err.message);
+                                        console.log(err.message);
+                                        //fmain.sendJSONresponse(res, 400, err.message);
                                         return;
                                     }
                                     if (user) {
@@ -243,7 +244,8 @@ router.put('/entries/:id', fauth.checkAuth, function (req, res) {
                             Push
                                 .findOne({ userId: userId }, function (err, user) {
                                     if (err) {
-                                        fmain.sendJSONresponse(res, 400, err.message);
+                                        console.log(err.message);
+                                        //fmain.sendJSONresponse(res, 400, err.message);
                                         return;
                                     }
                                     if (user) {
