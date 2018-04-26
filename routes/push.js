@@ -18,6 +18,13 @@ router.post('/subscribe', function (req, res) {
         }
     });
 
+    res.status(200).json({
+        body: req.body,
+        push: push
+    });
+
+    return;
+
     push.save(function (err, push) {
         if (err) {
             //console.error('error with subscribe:', err.message);
@@ -107,8 +114,8 @@ router.get('/checksubscribe/:userId', function (req, res) {
             .findOne({ userId: req.params.userId })
             .exec(function (err, user) {
                 if (!user) {
-                    fmain.sendJSONresponse(res, 404, {
-                        message: "User not subscribed"
+                    fmain.sendJSONresponse(res, 200, {
+                        subscribed: false
                     });
                     return;
                 } else if (err) {
@@ -116,7 +123,7 @@ router.get('/checksubscribe/:userId', function (req, res) {
                     return;
                 }
                 fmain.sendJSONresponse(res, 200, {
-                    message: "User subscribed"
+                    subscribed: true
                 });
             });
     } else {
