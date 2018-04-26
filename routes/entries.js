@@ -12,6 +12,8 @@ let Entries = require('../models/entries.models');
 let fmain = require('../functions/fmain');
 let fauth = require('../functions/fauth');
 let fsend = require('../functions/fsend-email');
+let Push = require('../models/push.models');
+let sendPush = require('../functions/fweb-push');
 
 // Create entry (Done)
 router.post('/entries', function (req, res) {
@@ -51,15 +53,23 @@ router.post('/entries', function (req, res) {
                             fsend.sendEmail(to, subject, emailBody.text, emailBody.html);
 
                             // send webPush
-                            let notificationPayload = {
-                                "notification": {
-                                    "title": subject,
-                                    "body": emailBody.text,
-                                }
-                            };
-                            sendPush.Notification(webPush, notificationPayload);
-
-                            return;
+                            Push
+                                .findOne({ userId: entry.masterId.id }, function (err, user) {
+                                    if (err) {
+                                        fmain.sendJSONresponse(res, 400, err.message);
+                                        return;
+                                    }
+                                    if (user) {
+                                        let notificationPayload = {
+                                            "notification": {
+                                                "title": subject,
+                                                "body": emailBody.text,
+                                            }
+                                        };
+                                        sendPush.Notification(webPush, notificationPayload);
+                                        return;
+                                    }
+                                });
                         });
                 } else {
                     fmain.sendJSONresponse(res, 404, {
