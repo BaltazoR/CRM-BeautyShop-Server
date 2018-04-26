@@ -70,6 +70,15 @@ router.post('/entries', function (req, res) {
                                                 "body": `test ${entry.masterId._id}`,
                                             }
                                         };
+
+                                        let webPush = {
+                                            endpoint: user.endpoint,
+                                            keys: {
+                                                p256dh: user.keys.p256dh,
+                                                auth: user.keys.auth
+                                            }
+                                        };
+
                                         sendPush.Notification(webPush, notificationPayload);
                                         return;
                                     }
