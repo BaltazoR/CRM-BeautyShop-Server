@@ -1,7 +1,7 @@
 let mongoose = require('mongoose');
 
 let pushSchema = new mongoose.Schema({
-    _id : false,
+    //_id : false,
     userId: {
         type: String,
         required: true,
