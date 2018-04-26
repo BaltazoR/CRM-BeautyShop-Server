@@ -50,6 +50,15 @@ router.post('/entries', function (req, res) {
                             let emailBody = fsend.templateEmailOrder(entry, 'master', 1);
                             fsend.sendEmail(to, subject, emailBody.text, emailBody.html);
 
+                            // send webPush
+                            let notificationPayload = {
+                                "notification": {
+                                    "title": subject,
+                                    "body": emailBody.text,
+                                }
+                            };
+                            sendPush.Notification(webPush, notificationPayload);
+
                             return;
                         });
                 } else {
@@ -198,7 +207,7 @@ router.put('/entries/:id', fauth.checkAuth, function (req, res) {
                             let to;
                             if (addressee === 'master') {
                                 to = entry.masterId.email;
-                            } else if (addressee === 'customer'){
+                            } else if (addressee === 'customer') {
                                 to = entry.customerId.email;
                             } else {
                                 console.log('Unknown addressee');

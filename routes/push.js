@@ -20,15 +20,7 @@ router.post('/subscribe', fauth.checkAuth, function (req, res) {
             if (err) {
                 fmain.sendJSONresponse(res, 400, err.message);
             } else {
-                let notificationPayload = {
-                    "notification": {
-                        "title": "Welcome",
-                        "body": "Thank you for enabling push notifications",
-                    }
-                };
-
-                sendPush.Notification(webPush, notificationPayload);
-
+                console.log(webPush);
                 fmain.sendJSONresponse(res, 200, {
                     subscribed: true
                 });
