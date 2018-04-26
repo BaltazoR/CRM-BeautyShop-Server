@@ -53,7 +53,8 @@ router.post('/entries', function (req, res) {
                             fsend.sendEmail(to, subject, emailBody.text, emailBody.html);
 
                             // send webPush
-                            console.log(entry.masterId);
+                            console.log('entry.masterId._id:', entry.masterId._id);
+                            console.log('entry.masterId:', entry.masterId);
                             return;
                             Push
                                 .findOne({ userId: entry.masterId._id }, function (err, user) {
