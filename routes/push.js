@@ -18,7 +18,7 @@ router.post('/subscribe', function (req, res) {
 
     push.save(function (err, push) {
         if (err) {
-            console.error('error with subscribe:', err.message);
+            //console.error('error with subscribe:', err.message);
             fmain.sendJSONresponse(res, 500, err.message);
             //res.status(500).json({ status: 'subscription not possible' });
             return;
@@ -64,7 +64,7 @@ router.post('/subscribe', function (req, res) {
                 ).then(function () {
                     console.log("Send welcome push notification");
                 }).catch(err => {
-                    console.error("Unable to send welcome push notification", err.message);
+                    //console.error("Unable to send welcome push notification", err.message);
                     fmain.sendJSONresponse(res, 404, err.message);
                     return;
                 });
@@ -86,7 +86,7 @@ router.post('/unsubscribe', function (req, res) {
 
     Push.findOneAndRemove({ endpoint: endpoint }, function (err) {
         if (err) {
-            console.error('error with unsubscribe:', err.message);
+            //console.error('error with unsubscribe:', err.message);
             fmain.sendJSONresponse(res, 500, err.message);
             //res.status(500).json({ status: 'unsubscription not possible' });
         }
@@ -110,7 +110,7 @@ router.get('/checksubscribe/:userId', function (req, res) {
                     });
                     return;
                 } else if (err) {
-                    fmain.sendJSONresponse(res, 404, err);
+                    fmain.sendJSONresponse(res, 404, err.message);
                     return;
                 }
                 fmain.sendJSONresponse(res, 200, {
