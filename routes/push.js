@@ -7,6 +7,8 @@ let Push = require('../models/push.models');
 // User subscribe
 router.post('/subscribe', function (req, res) {
 
+    console.log(req.body);
+
     let push = new Push({
         userId: req.body.userId,
         endpoint: req.body.endpoint,
