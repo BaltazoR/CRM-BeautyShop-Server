@@ -73,7 +73,7 @@ router.post('/subscribe', fauth.checkAuth, function (req, res) {
         );
 
         fmain.sendJSONresponse(res, 200, {
-            status: "subscribe"
+            subscribed: true
         });
 
         return;
@@ -94,7 +94,7 @@ router.post('/unsubscribe', fauth.checkAuth, function (req, res) {
         //console.log(data);
         console.log('unsubscribed');
         fmain.sendJSONresponse(res, 200, {
-            status: "unsubscribe"
+            subscribed: false
         });
     });
 });
