@@ -22,11 +22,24 @@ router.post('/subscribe', function (req, res) {
             return;
         }
 
-        const payload = JSON.stringify({
-            title: 'Welcome',
-            body: 'Thank you for enabling push notifications',
-            icon: 'https://s3.eu-central-1.amazonaws.com/aws-avatars/push-icon.png'
-        });
+        const notificationPayload = {
+            "notification": {
+                "title": "Welcome",
+                "body": "Thank you for enabling push notifications",
+                "icon": "https://s3.eu-central-1.amazonaws.com/aws-avatars/push-icon.png'",
+                "vibrate": [100, 50, 100],
+                "data": {
+                    "dateOfArrival": Date.now(),
+                    "primaryKey": 1
+                },
+                "actions": [{
+                    "action": "explore",
+                    "title": "Go to the site"
+                }]
+            }
+        };
+
+        const payload = JSON.stringify(notificationPayload);
 
         const options = {
             TTL: 86400 // 3 days
