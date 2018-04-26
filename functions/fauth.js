@@ -17,9 +17,10 @@ module.exports.checkAuth = function (req, res, next) {
         if (jwtError != void (0) || err != void (0)) {
             //console.log('err = ', err);
             //console.log('jwtError = ', jwtError);
-            fmain.sendJSONresponse(res, 403, { error: err.message || jwtError });
+            fmain.sendJSONresponse(res, 403, { error: err || jwtError.message });
             return;
         }
+        //console.log(decryptToken);
         req.user = decryptToken;
         next();
     })(req, res, next);
