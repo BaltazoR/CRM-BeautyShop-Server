@@ -53,11 +53,12 @@ router.post('/entries', function (req, res) {
                             fsend.sendEmail(to, subject, emailBody.text, emailBody.html);
 
                             // send webPush
-                            console.log('entry.masterId._id:', entry.masterId._id);
-                            console.log('entry.masterId:', entry.masterId);
-                            return;
+                            //console.log('entry.masterId._id:', entry.masterId._id);
+                            //console.log('entry.masterId:', entry.masterId);
+
                             Push
                                 .findOne({ userId: entry.masterId._id }, function (err, user) {
+                                    console.log('entry.masterId._id:', entry.masterId._id);
                                     if (err) {
                                         fmain.sendJSONresponse(res, 400, err.message);
                                         return;
@@ -66,7 +67,7 @@ router.post('/entries', function (req, res) {
                                         let notificationPayload = {
                                             "notification": {
                                                 "title": subject,
-                                                "body": emailBody.text,
+                                                "body": `test ${entry.masterId._id}`,
                                             }
                                         };
                                         sendPush.Notification(webPush, notificationPayload);
