@@ -54,7 +54,7 @@ router.post('/entries', function (req, res) {
 
                             // send webPush
                             Push
-                                .findOne({ userId: entry.masterId.id }, function (err, user) {
+                                .findOne({ userId: entry.masterId._id }, function (err, user) {
                                     if (err) {
                                         fmain.sendJSONresponse(res, 400, err.message);
                                         return;
