@@ -1,83 +1,44 @@
 let express = require('express');
 let router = express.Router();
 let fmain = require('../functions/fmain');
-let webPush = require('web-push');
+//let webPush = require('web-push');
 let Push = require('../models/push.models');
 let fauth = require('../functions/fauth');
+let sendPush = require('../functions/fweb-push');
 
 // User subscribe
 router.post('/subscribe', fauth.checkAuth, function (req, res) {
-
-    let push = new Push({
-        userId: req.user.id,
-        endpoint: req.body.endpoint,
-        keys: {
-            p256dh: req.body.keys.p256dh,
-            auth: req.body.keys.auth
-        }
-    });
-
-    push.save(function (err, push) {
-        if (err) {
-            //console.error('error with subscribe:', err.message);
-            fmain.sendJSONresponse(res, 500, err.message);
-            //res.status(500).json({ status: 'subscription not possible' });
-            return;
-        }
-
-        let notificationPayload = {
-            "notification": {
-                "title": "Welcome",
-                "body": "Thank you for enabling push notifications",
-                "icon": "https://s3.eu-central-1.amazonaws.com/aws-avatars/push-icon.png",
-                /* "vibrate": [100, 50, 100],
-                        "data": {
-                            "dateOfArrival": Date.now(),
-                            "primaryKey": 1
-                        },
-                        "actions": [{
-                            "action": "explore",
-                            "title": "Go to the site"
-                        }] */
-            }
-        };
-
-        let payload = JSON.stringify(notificationPayload);
-
-        let options = {
-            TTL: 86400 // 3 days
-        };
-
-        let subscription = {
-            endpoint: push.endpoint,
+    if (req.body && req.user && req.body.endpoint && req.body.req.body.keys.p256dh && req.body.keys.auth) {
+        webPush = Push.create({
+            userId: req.user.id,
+            endpoint: req.body.endpoint,
             keys: {
-                p256dh: push.keys.p256dh,
-                auth: push.keys.auth
+                p256dh: req.body.keys.p256dh,
+                auth: req.body.keys.auth
             }
-        };
+        }, function (err, webPush) {
+            if (err) {
+                fmain.sendJSONresponse(res, 400, err.message);
+            } else {
+                let notificationPayload = {
+                    "notification": {
+                        "title": "Welcome",
+                        "body": "Thank you for enabling push notifications",
+                    }
+                };
 
-        setTimeout(
-            function () {
-                webPush.sendNotification(
-                    subscription,
-                    payload,
-                    options
-                ).then(function () {
-                    console.log("Send welcome push notification");
-                }).catch(err => {
-                    //console.error("Unable to send welcome push notification", err.message);
-                    fmain.sendJSONresponse(res, 404, err.message);
-                    return;
+                sendPush.Notification(webPush, notificationPayload);
+
+                fmain.sendJSONresponse(res, 200, {
+                    subscribed: true
                 });
-            }, 5000
-        );
-
-        fmain.sendJSONresponse(res, 200, {
-            subscribed: true
+            }
         });
-
-        return;
-    });
+    } else {
+        fmain.sendJSONresponse(res, 400, {
+            "message": "All required fields must be filled"
+        });
+    }
 });
 
 // User unsubscribe
