@@ -18,8 +18,9 @@ router.post('/subscribe', function (req, res) {
 
     push.save(function (err, push) {
         if (err) {
-            console.error('error with subscribe', err);
-            res.status(500).json({ status: 'subscription not possible' });
+            console.error('error with subscribe:', err.message);
+            fmain.sendJSONresponse(res, 500, err.message);
+            //res.status(500).json({ status: 'subscription not possible' });
             return;
         }
 
@@ -62,19 +63,17 @@ router.post('/subscribe', function (req, res) {
                     options
                 ).then(function () {
                     console.log("Send welcome push notification");
-                    fmain.sendJSONresponse(res, 200, {
-                        message: "Push notification sended"
-                    });
                 }).catch(err => {
-                    console.error("Unable to send welcome push notification", err);
-                    fmain.sendJSONresponse(res, 404, err);
+                    console.error("Unable to send welcome push notification", err.message);
+                    fmain.sendJSONresponse(res, 404, err.message);
+                    return;
                 });
             }, 5000
         );
 
-        /*fmain.sendJSONresponse(res, 200, {
+        fmain.sendJSONresponse(res, 200, {
             status: "subscribe"
-        }); */
+        });
 
         return;
     });
@@ -85,13 +84,13 @@ router.post('/unsubscribe', function (req, res) {
 
     let endpoint = req.body.endpoint;
 
-    Push.findOneAndRemove({ endpoint: endpoint }, function (err, data) {
+    Push.findOneAndRemove({ endpoint: endpoint }, function (err) {
         if (err) {
-            console.error('error with unsubscribe', error);
-            fmain.sendJSONresponse(res, 500, err);
+            console.error('error with unsubscribe:', err.message);
+            fmain.sendJSONresponse(res, 500, err.message);
             //res.status(500).json({ status: 'unsubscription not possible' });
         }
-        console.log(data);
+        //console.log(data);
         console.log('unsubscribed');
         fmain.sendJSONresponse(res, 200, {
             status: "unsubscribe"
@@ -100,10 +99,10 @@ router.post('/unsubscribe', function (req, res) {
 });
 
 // Check if the user is subscribed
-router.get('/checksubscribe/:id', function (req, res) {
-    if (req.params && req.params.id) {
+router.get('/checksubscribe/:userId', function (req, res) {
+    if (req.params && req.params.userId) {
         Push
-            .findOne({userId: req.params.id})
+            .findOne({ userId: req.params.userId })
             .exec(function (err, user) {
                 if (!user) {
                     fmain.sendJSONresponse(res, 404, {
@@ -120,7 +119,7 @@ router.get('/checksubscribe/:id', function (req, res) {
             });
     } else {
         fmain.sendJSONresponse(res, 404, {
-            message: "no id in request"
+            message: "no userId in request"
         });
     }
 
