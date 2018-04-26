@@ -71,9 +71,9 @@ router.post('/subscribe', function (req, res) {
             }, 5000
         );
 
-        fmain.sendJSONresponse(res, 200, {
+        /*fmain.sendJSONresponse(res, 200, {
             status: "subscribe"
-        });
+        }); */
 
         return;
     });
