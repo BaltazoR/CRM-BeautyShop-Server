@@ -224,10 +224,13 @@ router.put('/entries/:id', fauth.checkAuth, function (req, res) {
 
                             // send Email
                             let to;
+                            let userId;
                             if (addressee === 'master') {
                                 to = entry.masterId.email;
+                                userId = entry.masterId._id;
                             } else if (addressee === 'customer') {
                                 to = entry.customerId.email;
+                                userId = entry.customerId._id;
                             } else {
                                 console.log('Unknown addressee');
                                 return;
@@ -235,6 +238,34 @@ router.put('/entries/:id', fauth.checkAuth, function (req, res) {
                             let subject = 'Your order status has been changed';
                             let emailBody = fsend.templateEmailOrder(entry, addressee);
                             fsend.sendEmail(to, subject, emailBody.text, emailBody.html);
+
+                            // send webPush
+                            Push
+                                .findOne({ userId: userId }, function (err, user) {
+                                    if (err) {
+                                        fmain.sendJSONresponse(res, 400, err.message);
+                                        return;
+                                    }
+                                    if (user) {
+                                        let notificationPayload = {
+                                            "notification": {
+                                                "title": subject,
+                                                "body": emailBody.text,
+                                            }
+                                        };
+
+                                        let webPush = {
+                                            endpoint: user.endpoint,
+                                            keys: {
+                                                p256dh: user.keys.p256dh,
+                                                auth: user.keys.auth
+                                            }
+                                        };
+
+                                        sendPush.Notification(webPush, notificationPayload);
+                                        return;
+                                    }
+                                });
 
                             return;
                         });
