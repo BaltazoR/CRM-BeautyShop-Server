@@ -41,7 +41,7 @@ router.post('/subscribe', function (req, res) {
         };
 
         setTimeout(
-            () => {
+            function () {
                 webPush.sendNotification(
                     subscription,
                     payload,
@@ -51,9 +51,10 @@ router.post('/subscribe', function (req, res) {
                 }).catch(err => {
                     console.error("Unable to send welcome push notification", err);
                 });
-                res.status(200).json({ status: 'subscribe' });
             }, 5000
         );
+
+        res.status(200).json({ status: 'subscribe' });
 
         return;
     });
