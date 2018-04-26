@@ -1,8 +1,10 @@
 let express = require('express');
 let router = express.Router();
+let fmain = require('../functions/fmain');
 let webPush = require('web-push');
 let Push = require('../models/push.models');
 
+// User subscribe
 router.post('/subscribe', function (req, res) {
 
     let push = new Push({
@@ -71,7 +73,7 @@ router.post('/subscribe', function (req, res) {
     });
 });
 
-
+// User unsubscribe
 router.post('/unsubscribe', function (req, res) {
 
     let endpoint = req.body.endpoint;
@@ -85,6 +87,33 @@ router.post('/unsubscribe', function (req, res) {
         console.log('unsubscribed');
         res.status(200).json({ status: 'unsubscribe' });
     });
+});
+
+// Check if the user is subscribed
+router.get('/checksubscribe/:id', function (req, res) {
+    if (req.params && req.params.id) {
+        Push
+            .findOne({userId: req.params.id})
+            .exec(function (err, user) {
+                if (!user) {
+                    fmain.sendJSONresponse(res, 404, {
+                        message: "User not subscribed"
+                    });
+                    return;
+                } else if (err) {
+                    fmain.sendJSONresponse(res, 404, err);
+                    return;
+                }
+                fmain.sendJSONresponse(res, 200, {
+                    message: "User subscribed"
+                });
+            });
+    } else {
+        fmain.sendJSONresponse(res, 404, {
+            message: "no id in request"
+        });
+    }
+
 });
 
 module.exports = router;
