@@ -18,7 +18,7 @@ router.post('/subscribe', function (req, res) {
     push.save(function (err, push) {
         if (err) {
             console.error('error with subscribe', error);
-            res.status(500).json({status: 'subscription not possible'});
+            res.status(500).json({ status: 'subscription not possible' });
             return;
         }
 
@@ -40,16 +40,21 @@ router.post('/subscribe', function (req, res) {
             }
         };
 
-        webPush.sendNotification(
-            subscription,
-            payload,
-            options
-        ).then(function () {
-            console.log("Send welcome push notification");
-        }).catch(err => {
-            console.error("Unable to send welcome push notification", err);
-        });
-        res.status(200).json({status: 'subscribe'});
+        setTimeout(
+            () => {
+                webPush.sendNotification(
+                    subscription,
+                    payload,
+                    options
+                ).then(function () {
+                    console.log("Send welcome push notification");
+                }).catch(err => {
+                    console.error("Unable to send welcome push notification", err);
+                });
+                res.status(200).json({ status: 'subscribe' });
+            }, 5000
+        );
+
         return;
     });
 });
@@ -62,11 +67,11 @@ router.post('/unsubscribe', function (req, res) {
     Push.findOneAndRemove({ endpoint: endpoint }, function (err, data) {
         if (err) {
             console.error('error with unsubscribe', error);
-            res.status(500).json({status: 'unsubscription not possible'});
+            res.status(500).json({ status: 'unsubscription not possible' });
         }
         console.log(data);
         console.log('unsubscribed');
-        res.status(200).json({status: 'unsubscribe'});
+        res.status(200).json({ status: 'unsubscribe' });
     });
 });
 
