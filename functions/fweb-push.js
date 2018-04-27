@@ -23,9 +23,9 @@ module.exports.Notification = function (push, notificationPayload) {
         payload,
         options
     ).then(function () {
-        console.log("Send welcome push notification");
+        console.log("Push notification sended successful");
     }).catch(err => {
-        console.log(err.message);
+        console.log('error(push notification):', err.message);
         //fmain.sendJSONresponse(res, 404, err.message);
         return;
     });
