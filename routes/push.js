@@ -42,22 +42,27 @@ router.post('/subscribe', fauth.checkAuth, function (req, res) {
 });
 
 // User unsubscribe
-router.post('/unsubscribe', fauth.checkAuth, function (req, res) {
+router.delete('/unsubscribe', fauth.checkAuth, function (req, res) {
 
-    let endpoint = req.body.endpoint;
+    if (req.body && req.user && req.body.endpoint && req.user.id) {
 
-    Push.findOneAndRemove({ endpoint: endpoint }, function (err) {
-        if (err) {
-            //console.error('error with unsubscribe:', err.message);
-            fmain.sendJSONresponse(res, 500, err.message);
-            //res.status(500).json({ status: 'unsubscription not possible' });
-        }
-        //console.log(data);
-        console.log('unsubscribed');
-        fmain.sendJSONresponse(res, 200, {
-            subscribed: false
+        Push.findOneAndRemove({ userId: req.user.id, endpoint: req.body.endpoint }, function (err) {
+            if (err) {
+                //console.error('error with unsubscribe:', err.message);
+                fmain.sendJSONresponse(res, 500, err.message);
+                //res.status(500).json({ status: 'unsubscription not possible' });
+            }
+            //console.log(data);
+            console.log('unsubscribed');
+            fmain.sendJSONresponse(res, 200, {
+                subscribed: false
+            });
         });
-    });
+    } else {
+        fmain.sendJSONresponse(res, 404, {
+            message: "no userId or endpoint in request"
+        });
+    }
 });
 
 // Check if the user is subscribed
@@ -81,7 +86,7 @@ router.post('/checksubscribe', fauth.checkAuth, function (req, res) {
             });
     } else {
         fmain.sendJSONresponse(res, 404, {
-            message: "no userId in request"
+            message: "no userId or endpoint in request"
         });
     }
 
