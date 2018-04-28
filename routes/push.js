@@ -43,10 +43,10 @@ router.post('/subscribe', fauth.checkAuth, function (req, res) {
 
 // User unsubscribe
 router.delete('/unsubscribe', fauth.checkAuth, function (req, res) {
+
+    console.log('body:', req.body);
+
     if (req.body && req.user && req.body.endpoint && req.user.id) {
-
-        console.log('body:', req.body);
-
         Push.findOneAndRemove({ userId: req.user.id, endpoint: req.body.endpoint }, function (err) {
             if (err) {
                 //console.error('error with unsubscribe:', err.message);
