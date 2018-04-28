@@ -61,10 +61,10 @@ router.post('/unsubscribe', fauth.checkAuth, function (req, res) {
 });
 
 // Check if the user is subscribed
-router.get('/checksubscribe/:userId', function (req, res) {
-    if (req.params && req.params.userId) {
+router.post('/checksubscribe', fauth.checkAuth, function (req, res) {
+    if (req.body && req.user && req.body.endpoint && req.user.id) {
         Push
-            .findOne({ userId: req.params.userId })
+            .findOne({ userId: req.user.id, endpoint: req.body.endpoint })
             .exec(function (err, user) {
                 if (!user) {
                     fmain.sendJSONresponse(res, 200, {
