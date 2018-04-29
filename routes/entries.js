@@ -241,30 +241,35 @@ router.put('/entries/:id', fauth.checkAuth, function (req, res) {
                             fsend.sendEmail(to, subject, emailBody.text, emailBody.html);
 
                             // send webPush
+                            console.log(userId);
                             Push
-                                .findOne({ userId: userId }, function (err, user) {
+                                .find({ userId: userId }, function (err, users) {
                                     if (err) {
                                         console.log(err.message);
                                         //fmain.sendJSONresponse(res, 400, err.message);
                                         return;
                                     }
-                                    if (user) {
-                                        let notificationPayload = {
-                                            "notification": {
-                                                "title": subject,
-                                                "body": emailBody.text,
-                                            }
-                                        };
+                                    if (users.length !== 0) {
+                                        console.log(users);
+                                        users.forEach(user => {
+                                            let notificationPayload = {
+                                                "notification": {
+                                                    "title": subject,
+                                                    "body": emailBody.text,
+                                                }
+                                            };
 
-                                        let webPush = {
-                                            endpoint: user.endpoint,
-                                            keys: {
-                                                p256dh: user.keys.p256dh,
-                                                auth: user.keys.auth
-                                            }
-                                        };
+                                            let webPush = {
+                                                endpoint: user.endpoint,
+                                                keys: {
+                                                    p256dh: user.keys.p256dh,
+                                                    auth: user.keys.auth
+                                                }
+                                            };
 
-                                        sendPush.Notification(webPush, notificationPayload);
+                                            sendPush.Notification(webPush, notificationPayload);
+                                        });
+
                                         return;
                                     }
                                 });
