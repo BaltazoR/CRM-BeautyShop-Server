@@ -8,6 +8,10 @@ let sendPush = require('../functions/fweb-push');
 
 // User subscribe
 router.post('/subscribe', fauth.checkAuth, function (req, res) {
+
+    console.log('req.body:', req.body);
+    console.log('req.user.id:', req.user.id);
+
     if (req.body && req.user && req.body.endpoint && req.body.keys.p256dh && req.body.keys.auth) {
         webPush = Push.create({
             userId: req.user.id,
