@@ -56,37 +56,7 @@ router.post('/entries', function (req, res) {
                             let notification = {};
                             notification.title = 'A new entry';
                             notification.body = `You have a new entry on ${entry.date} at ${entry.time}`;
-
                             sendPush.notification(entry.masterId._id, notification);
-
-                            /*Push
-                                .findOne({ userId: entry.masterId._id }, function (err, user) {
-                                    if (err) {
-                                        console.log(err.message);
-                                        //fmain.sendJSONresponse(res, 400, err.message);
-                                        return;
-                                    }
-                                    if (user) {
-                                        let notificationPayload = {
-                                            "notification": {
-                                                "title": subject,
-                                                "body": emailBody.text,
-                                            }
-                                        };
-
-                                        let webPush = {
-                                            endpoint: user.endpoint,
-                                            keys: {
-                                                p256dh: user.keys.p256dh,
-                                                auth: user.keys.auth
-                                            }
-                                        };
-
-                                        sendPush.Notification(webPush, notificationPayload);
-                                        return;
-                                    }
-                                }); */
-
                         });
                 } else {
                     fmain.sendJSONresponse(res, 404, {
@@ -233,12 +203,15 @@ router.put('/entries/:id', fauth.checkAuth, function (req, res) {
                             // send Email
                             let to;
                             let userId;
+                            let notificationUserName;
                             if (addressee === 'master') {
                                 to = entry.masterId.email;
                                 userId = entry.masterId._id;
+                                notificationUserName = entry.customerId.name;
                             } else if (addressee === 'customer') {
                                 to = entry.customerId.email;
                                 userId = entry.customerId._id;
+                                notificationUserName = entry.masterId.name;
                             } else {
                                 console.log('Unknown addressee');
                                 return;
@@ -248,39 +221,10 @@ router.put('/entries/:id', fauth.checkAuth, function (req, res) {
                             fsend.sendEmail(to, subject, emailBody.text, emailBody.html);
 
                             // send webPush
-                            Push
-                                .find({ userId: userId }, function (err, users) {
-                                    if (err) {
-                                        console.log(err.message);
-                                        //fmain.sendJSONresponse(res, 400, err.message);
-                                        return;
-                                    }
-                                    if (users.length !== 0) {
-                                        console.log(users);
-                                        users.forEach(user => {
-                                            let notificationPayload = {
-                                                "notification": {
-                                                    "title": subject,
-                                                    "body": emailBody.text,
-                                                }
-                                            };
-
-                                            let webPush = {
-                                                endpoint: user.endpoint,
-                                                keys: {
-                                                    p256dh: user.keys.p256dh,
-                                                    auth: user.keys.auth
-                                                }
-                                            };
-
-                                            sendPush.Notification(webPush, notificationPayload);
-                                        });
-
-                                        return;
-                                    }
-                                });
-
-                            return;
+                            let notification = {};
+                            notification.title = 'The entry status has been changed.';
+                            notification.body = `${notificationUserName} has changed the entry status to ${entry.status}. The entry is scheduled on ${entry.date} at ${entry.time}.`;
+                            sendPush.notification(userId, notification);
                         });
                 } else {
                     fmain.sendJSONresponse(res, 404, {
