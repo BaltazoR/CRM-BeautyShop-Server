@@ -53,7 +53,13 @@ router.post('/entries', function (req, res) {
                             fsend.sendEmail(to, subject, emailBody.text, emailBody.html);
 
                             // send webPush
-                            Push
+                            let notification = {};
+                            notification.title = 'A new entry';
+                            notification.body = `You have a new entry on ${entry.date} at ${entry.time}`;
+
+                            sendPush.notification(entry.masterId._id, notification);
+
+                            /*Push
                                 .findOne({ userId: entry.masterId._id }, function (err, user) {
                                     if (err) {
                                         console.log(err.message);
@@ -79,7 +85,8 @@ router.post('/entries', function (req, res) {
                                         sendPush.Notification(webPush, notificationPayload);
                                         return;
                                     }
-                                });
+                                }); */
+
                         });
                 } else {
                     fmain.sendJSONresponse(res, 404, {
@@ -241,7 +248,6 @@ router.put('/entries/:id', fauth.checkAuth, function (req, res) {
                             fsend.sendEmail(to, subject, emailBody.text, emailBody.html);
 
                             // send webPush
-                            console.log(userId);
                             Push
                                 .find({ userId: userId }, function (err, users) {
                                     if (err) {
