@@ -55,7 +55,7 @@ router.post('/entries', function (req, res) {
                             // send webPush
                             let notification = {};
                             notification.title = 'A new entry';
-                            notification.body = `You have a new entry on ${entry.date} at ${entry.time}`;
+                            notification.body = `${entry.masterId.name}, you have a new entry on ${entry.date} at ${entry.time}`;
                             sendPush.notification(entry.masterId._id, notification);
                         });
                 } else {
