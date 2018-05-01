@@ -20,18 +20,15 @@ router.post('/subscribe', fauth.checkAuth, function (req, res) {
                 p256dh: req.body.keys.p256dh,
                 auth: req.body.keys.auth
             }
-        }, function (err, webPush) {
+        }, function (err) {
             if (err) {
                 fmain.sendJSONresponse(res, 400, err.message);
             } else {
 
-                let notificationPayload = {
-                    "notification": {
-                        "title": "Welcome to BeatyShop",
-                        "body": "Thank you for enabling push notifications",
-                    }
-                };
-                sendPush.Notification(webPush, notificationPayload);
+                let notification = {};
+                notification.title = 'Welcome to BeatyShop';
+                notification.body = "Thank you for enabling push notifications";
+                sendPush.notification(req.user.id, notification);
 
                 fmain.sendJSONresponse(res, 200, {
                     subscribed: true
