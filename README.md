@@ -5,6 +5,8 @@
 
 ### API [beautyshop-server.herokuapp.com/api](http://beautyshop-server.herokuapp.com/api)
 
+### Презентация [link](https://docs.google.com/presentation/d/1evrs7UpZOxepx1hq7074Vvzf9nr5iprIEHFn8FL57yU/)
+
 # Routes for users:
 
 ### Без авторизации:
@@ -55,11 +57,12 @@
 \* deprecated
 
 # Routes push:
-### Без авторизации:
+### C авторизацией:
 
 | ROUTE | DESCRIPTION |
 | ------------ | ------------ |
 | post /subscribe | подписаться на WebPush уведомления |
 | post /unsubscribe | отписаться от WebPush уведомлений |
+| post /checksubscribe | проверка статуса подписки на WebPush уведомления |
 
 
