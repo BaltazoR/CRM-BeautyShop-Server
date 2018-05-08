@@ -1,7 +1,7 @@
 # CRM BeautyShop (Backend)
 
 
-### ссылка на фронтэнд  [beautyshop-server.herokuapp.com](http://beautyshop-server.herokuapp.com)
+### ссылка на фронтэнд  [https://d2z0iokdukqe3z.cloudfront.net/](https://d2z0iokdukqe3z.cloudfront.net/)
 
 ### API [beautyshop-server.herokuapp.com/api](http://beautyshop-server.herokuapp.com/api)
 
