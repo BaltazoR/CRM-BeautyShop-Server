@@ -5,7 +5,8 @@
 
 ### API [beautyshop-server.herokuapp.com/api](http://beautyshop-server.herokuapp.com/api)
 
-### Презентация [link](https://docs.google.com/presentation/d/1evrs7UpZOxepx1hq7074Vvzf9nr5iprIEHFn8FL57yU/)
+### Презентация 08.05.2018 [link](https://docs.google.com/presentation/d/1evrs7UpZOxepx1hq7074Vvzf9nr5iprIEHFn8FL57yU/)
+### Презентация 10.05.2018 [link](https://docs.google.com/presentation/d/1WYA-1gTt4olOKgFDpOYUBSvFlQpvQs86vI04r1h4psI/)
 
 # Routes for users:
 
